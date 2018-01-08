@@ -23,6 +23,11 @@
 			<artifactId>projewski-ui-terminal</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>pl.projewski.bitcoin</groupId>
+			<artifactId>projewski-store-json</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

@@ -6,8 +6,8 @@ import java.util.List;
 
 import lombok.Data;
 import pl.projewski.bitcoin.bitbay.api.v2.Trade;
-import pl.projewski.bitcoin.common.TransactionConfig;
-import pl.projewski.bitcoin.common.WatcherConfig;
+import pl.projewski.bitcoin.store.api.data.TransactionConfig;
+import pl.projewski.bitcoin.store.api.data.WatcherConfig;
 
 @Data
 public class BitBayCoinWatch {

@@ -3,15 +3,18 @@ package pl.projewski.bitcoin.portfolio;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Timer;
 
 import pl.projewski.bitcoin.bitbay.watcher.BitBayWatcher;
 import pl.projewski.bitcoin.common.Calculator;
-import pl.projewski.bitcoin.common.TransactionConfig;
-import pl.projewski.bitcoin.common.WatcherConfig;
 import pl.projewski.bitcoin.common.interfaces.IExchangeWatcher;
+import pl.projewski.bitcoin.store.api.IStoreManager;
+import pl.projewski.bitcoin.store.api.data.TransactionConfig;
+import pl.projewski.bitcoin.store.api.data.WatcherConfig;
 import pl.projewski.bitcoin.ui.terminal.TerminalStatisticsDrawer;
+import pl.projewski.store.json.JsonStoreManager;
 
 // TODO: Divide to watcher and alarms - watcher only to observe statistics and alarm to put alarm, when something is go.
 public class Portfolio {
@@ -20,6 +23,19 @@ public class Portfolio {
 	public static void main(final String[] args) {
 		final int updateSeconds = 20;
 		final IExchangeWatcher watcher = new BitBayWatcher(new TerminalStatisticsDrawer());
+		final IStoreManager storeManager = JsonStoreManager.getInstance();
+
+		// load stored data
+		storeManager.load();
+		final List<WatcherConfig> watchers = storeManager.getWatchers();
+		for (final WatcherConfig watcherConfig : watchers) {
+			watcher.addConfiguration(watcherConfig);
+		}
+		final List<TransactionConfig> transactions = storeManager.getTransactions();
+		for (final TransactionConfig transactionConfig : transactions) {
+			watcher.addTransaction(transactionConfig);
+		}
+
 		while (true) {
 			final Timer timer = new Timer();
 			timer.schedule(new OneTask(watcher), 0, 1000 * updateSeconds);
@@ -57,14 +73,18 @@ public class Portfolio {
 							config.setCryptoCoin(coin);
 							config.setAmountTradeInStatistic(100);
 							watcher.addConfiguration(config);
+							storeManager.addWatcher(config);
 							System.out.println("Append configuration");
 						} else {
 							// remove existing
 							// TODO: If there's any open transaction - ask or
 							// don't allow
 							watcher.removeCoinConfiguration(config);
+							storeManager.removeWatcher(config);
 							System.out.println("Remove configuration");
 						}
+						storeManager.store(); // TODO: Maybe some catch
+						                      // procedure
 						break;
 					}
 					case "buy": {
@@ -98,6 +118,9 @@ public class Portfolio {
 						        + txConfig.getInvest().multiply(txConfig.getTargetPercentage()).divide(HUNDRED, 2,
 						                RoundingMode.HALF_UP));
 						watcher.addTransaction(txConfig);
+						storeManager.addTransaction(txConfig);
+						storeManager.store(); // TODO: Maybe some catch
+						                      // procedure
 						break;
 					}
 					case "sell": {
@@ -120,6 +143,7 @@ public class Portfolio {
 						// config.setStopPercentage(null);
 						// config.setStopPrice(null);
 						// config.setZeroPrice(null);
+						// TODO: Modify store
 						break;
 					}
 					case "start":

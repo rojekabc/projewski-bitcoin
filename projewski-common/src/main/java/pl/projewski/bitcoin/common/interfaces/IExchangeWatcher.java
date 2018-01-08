@@ -2,8 +2,8 @@ package pl.projewski.bitcoin.common.interfaces;
 
 import java.math.BigDecimal;
 
-import pl.projewski.bitcoin.common.TransactionConfig;
-import pl.projewski.bitcoin.common.WatcherConfig;
+import pl.projewski.bitcoin.store.api.data.TransactionConfig;
+import pl.projewski.bitcoin.store.api.data.WatcherConfig;
 
 public interface IExchangeWatcher extends Runnable {
 	void addConfiguration(final WatcherConfig config);

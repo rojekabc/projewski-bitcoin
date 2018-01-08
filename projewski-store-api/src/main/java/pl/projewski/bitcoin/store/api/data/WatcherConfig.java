@@ -1,4 +1,4 @@
-package pl.projewski.bitcoin.common;
+package pl.projewski.bitcoin.store.api.data;
 
 import lombok.Data;
 

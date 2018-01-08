@@ -12,12 +12,12 @@ import java.util.Map;
 import pl.projewski.bitcoin.bitbay.api.v2.BitBayEndpoint;
 import pl.projewski.bitcoin.bitbay.api.v2.SortType;
 import pl.projewski.bitcoin.bitbay.api.v2.Trade;
-import pl.projewski.bitcoin.common.TransactionConfig;
 import pl.projewski.bitcoin.common.TransactionStatistics;
-import pl.projewski.bitcoin.common.WatcherConfig;
 import pl.projewski.bitcoin.common.WatcherStatistics;
 import pl.projewski.bitcoin.common.interfaces.IExchangeWatcher;
 import pl.projewski.bitcoin.common.interfaces.IStatisticsDrawer;
+import pl.projewski.bitcoin.store.api.data.TransactionConfig;
+import pl.projewski.bitcoin.store.api.data.WatcherConfig;
 
 public class BitBayWatcher implements IExchangeWatcher {
 

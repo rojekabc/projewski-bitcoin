@@ -3,6 +3,7 @@ package pl.projewski.bitcoin.common;
 import java.math.BigDecimal;
 
 import lombok.Data;
+import pl.projewski.bitcoin.store.api.data.TransactionConfig;
 
 @Data
 public class TransactionStatistics {

@@ -7,4 +7,11 @@
   </parent>
   <artifactId>projewski-common</artifactId>
   <name>Common Library</name>
+  <dependencies>
+  	<dependency>
+  		<groupId>pl.projewski.bitcoin</groupId>
+  		<artifactId>projewski-store-api</artifactId>
+  		<version>0.0.1-SNAPSHOT</version>
+  	</dependency>
+  </dependencies>
 </project>
