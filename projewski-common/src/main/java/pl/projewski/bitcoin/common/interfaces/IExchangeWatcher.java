@@ -14,6 +14,8 @@ public interface IExchangeWatcher extends Runnable {
 
 	void addTransaction(final TransactionConfig tx);
 
+	void removeTransaction(final TransactionConfig tx);
+
 	BigDecimal getFee();
 
 }

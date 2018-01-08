@@ -20,11 +20,7 @@ import pl.projewski.store.json.JsonStoreManager;
 public class Portfolio {
 	private final static BigDecimal HUNDRED = new BigDecimal("100");
 
-	public static void main(final String[] args) {
-		final int updateSeconds = 20;
-		final IExchangeWatcher watcher = new BitBayWatcher(new TerminalStatisticsDrawer());
-		final IStoreManager storeManager = JsonStoreManager.getInstance();
-
+	private static void loadConfiguration(final IExchangeWatcher watcher, final IStoreManager storeManager) {
 		// load stored data
 		storeManager.load();
 		final List<WatcherConfig> watchers = storeManager.getWatchers();
@@ -35,6 +31,13 @@ public class Portfolio {
 		for (final TransactionConfig transactionConfig : transactions) {
 			watcher.addTransaction(transactionConfig);
 		}
+	}
+
+	public static void main(final String[] args) {
+		final int updateSeconds = 20;
+		final IExchangeWatcher watcher = new BitBayWatcher(new TerminalStatisticsDrawer());
+		final IStoreManager storeManager = JsonStoreManager.getInstance();
+		loadConfiguration(watcher, storeManager);
 
 		while (true) {
 			final Timer timer = new Timer();
@@ -124,26 +127,27 @@ public class Portfolio {
 						break;
 					}
 					case "sell": {
-						System.out.println("Currently unsupported - sorry");
-						// System.out.print("Coin symbol: ");
-						// final String coin = scanner.nextLine().toUpperCase();
-						// final WatcherConfig config =
-						// watcher.findConfiguration(coin);
-						// if (config == null) {
-						// System.out.println("Cannot find coin symbol in
-						// watchers");
-						// break;
-						// }
-						//
-						// // zero every buy information
-						// config.setInvest(null);
-						// config.setBuyPrice(null);
-						// config.setTargetPercentage(null);
-						// config.setTargetPrice(null);
-						// config.setStopPercentage(null);
-						// config.setStopPrice(null);
-						// config.setZeroPrice(null);
-						// TODO: Modify store
+						BigDecimal txId;
+						if (split.length < 2) {
+							System.out.print("Tx Id:");
+							txId = new BigDecimal(scanner.nextLine());
+						} else {
+							txId = new BigDecimal(split[1]);
+						}
+						final List<TransactionConfig> transactions = storeManager.getTransactions();
+						TransactionConfig txToSell = null;
+						for (final TransactionConfig transaction : transactions) {
+							if (transaction.getId().equals(txId)) {
+								txToSell = transaction;
+								break;
+							}
+						}
+						if (txToSell == null) {
+							System.out.println("No transaction with id=" + txId);
+							break;
+						}
+						storeManager.removeTransaction(txToSell);
+						watcher.removeTransaction(txToSell);
 						break;
 					}
 					case "start":

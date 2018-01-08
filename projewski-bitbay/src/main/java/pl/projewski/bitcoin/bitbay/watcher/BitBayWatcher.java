@@ -163,4 +163,11 @@ public class BitBayWatcher implements IExchangeWatcher {
 		return FEE;
 	}
 
+	@Override
+	public void removeTransaction(final TransactionConfig tx) {
+		final BitBayCoinWatch coinWatch = watchMap.get(tx.getCryptoCoin());
+		coinWatch.getTransactions().remove(tx);
+
+	}
+
 }
