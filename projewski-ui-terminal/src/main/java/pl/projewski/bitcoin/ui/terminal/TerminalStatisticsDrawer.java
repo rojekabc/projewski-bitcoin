@@ -26,7 +26,7 @@ public class TerminalStatisticsDrawer implements IStatisticsDrawer {
 	};
 
 	private final static StatTableElement[] TX_TABLE_ELEMENTS = { //
-	        new StatTableElement(5, "Id", "id"), //
+	        new StatTableElement(5, "Id", "config.id"), //
 	        new StatTableElement(5, "Coin", "config.cryptoCoin"), //
 	        new StatTableElement(10, "Invest", "config.invest"), //
 	        new StatTableElement(10, "Buy price", "config.buyPrice"), //

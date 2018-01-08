@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.collections4.list.UnmodifiableList;
@@ -20,6 +22,14 @@ public class JsonStoreManager implements IStoreManager {
 	private StoreContainer container = new StoreContainer();
 	private static JsonStoreManager instance = null;
 	private final static String filename = "pbsc.json";
+	private final static BigDecimal ONE = new BigDecimal("1");
+
+	private static final Comparator<TransactionConfig> TRANSACTION_SORTER = new Comparator<TransactionConfig>() {
+		@Override
+		public int compare(final TransactionConfig tx1, final TransactionConfig tx2) {
+			return tx1.getId().compareTo(tx2.getId());
+		}
+	};
 
 	private JsonStoreManager() {
 	}
@@ -33,7 +43,22 @@ public class JsonStoreManager implements IStoreManager {
 
 	@Override
 	public void addTransaction(final TransactionConfig transaction) {
-		container.getTransactionList().add(transaction);
+		final List<TransactionConfig> transactionList = container.getTransactionList();
+		if (transaction.getId() == null) {
+			// find id gap to assign to the new transaction
+			BigDecimal id = ONE;
+			for (final TransactionConfig transactionConfig : transactionList) {
+				final BigDecimal txId = transactionConfig.getId();
+				if (txId.equals(id)) {
+					id = id.add(ONE);
+				} else {
+					break;
+				}
+			}
+			transaction.setId(id);
+		}
+		transactionList.add(transaction);
+		transactionList.sort(TRANSACTION_SORTER);
 	}
 
 	@Override
@@ -43,7 +68,8 @@ public class JsonStoreManager implements IStoreManager {
 
 	@Override
 	public List<TransactionConfig> getTransactions() {
-		return new UnmodifiableList<>(container.getTransactionList());
+		final List<TransactionConfig> transactionList = container.getTransactionList();
+		return new UnmodifiableList<>(transactionList);
 	}
 
 	@Override

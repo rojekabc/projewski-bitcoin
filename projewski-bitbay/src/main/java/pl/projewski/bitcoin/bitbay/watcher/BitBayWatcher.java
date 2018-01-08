@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,6 +25,12 @@ public class BitBayWatcher implements IExchangeWatcher {
 	private final Map<String, BitBayCoinWatch> watchMap = new HashMap<>();
 	private final IStatisticsDrawer statisticsDrawer;
 	private final static BigDecimal FEE = new BigDecimal("0.44");
+	private static final Comparator<TransactionStatistics> TXSTATS_SORTER = new Comparator<TransactionStatistics>() {
+		@Override
+		public int compare(final TransactionStatistics tx1, final TransactionStatistics tx2) {
+			return tx1.getConfig().getId().compareTo(tx2.getConfig().getId());
+		}
+	};
 
 	public BitBayWatcher(final IStatisticsDrawer statisticsDrawer) {
 		this.statisticsDrawer = statisticsDrawer;
@@ -142,6 +149,8 @@ public class BitBayWatcher implements IExchangeWatcher {
 					txStatsList.add(txStats);
 				}
 			}
+			// sort by transaction id (without this sorting by coin)
+			txStatsList.sort(TXSTATS_SORTER);
 			statisticsDrawer.updateStatistics(statsList, txStatsList);
 		} catch (final Exception e) {
 			statisticsDrawer.informException(e);

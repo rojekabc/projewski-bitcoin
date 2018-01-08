@@ -6,6 +6,9 @@ import lombok.Data;
 
 @Data
 public class TransactionConfig {
+	private BigDecimal id;
+	private String name;
+
 	private String baseCoin;
 	private String cryptoCoin;
 
