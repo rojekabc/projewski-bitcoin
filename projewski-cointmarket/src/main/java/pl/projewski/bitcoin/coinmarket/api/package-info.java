@@ -1,0 +1,1 @@
+package pl.projewski.bitcoin.coinmarket.api;
