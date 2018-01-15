@@ -1,6 +1,12 @@
 # Projewski-Bitcoin
 
 This project is the set of Java Libraries and Appications, which are helpfull in observe and manage bitcoin and other alt-coins.
+Current project applcation, projewski-portfolio, has following features:
+* add / remove watchers to exchange to observe coins
+* add / remove transactions, which we wish to observe and use "stop win" (target alarm), "stop loose" (stop alarm), "moving stop" (move stop alarm)
+* works as a terminal application, which uses Ansi (color linux terminal by default, windows with, for example, git-bash application)
+* store last user configuration in the JSON file and loads it, when application starts again
+* watch BitBay exchange
 
 ## Getting started
 
@@ -27,3 +33,5 @@ mvn package
 ```
 java -jar projewski-portfolio-*.jar
 ```
+## Planned features / roadmap
+Now I'm working on version 0.0.1. Current version is a snapshot. Issue backlog and milestone for version 0.0.1 is visible on the project's Issues tab.
