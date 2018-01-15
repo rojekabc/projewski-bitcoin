@@ -6,11 +6,9 @@ import pl.projewski.bitcoin.store.api.data.TransactionConfig;
 import pl.projewski.bitcoin.store.api.data.WatcherConfig;
 
 public interface IExchangeWatcher extends Runnable {
-	void addConfiguration(final WatcherConfig config);
+	void addWatcher(final WatcherConfig config);
 
-	WatcherConfig findConfiguration(final String coin);
-
-	void removeCoinConfiguration(final WatcherConfig config);
+	void removeWatcher(final WatcherConfig config);
 
 	void addTransaction(final TransactionConfig tx);
 
@@ -18,4 +16,5 @@ public interface IExchangeWatcher extends Runnable {
 
 	BigDecimal getFee();
 
+	String getName();
 }

@@ -22,4 +22,9 @@ public class Calculator {
 		return buyPrice.add(
 		        buyPrice.multiply(feePercetage.multiply(new BigDecimal("2"))).divide(HUNDRED, 2, RoundingMode.HALF_UP));
 	}
+
+	public static BigDecimal moveStopPrice(final BigDecimal maxLastBuyPrice, final BigDecimal moveStopPercentage) {
+		return maxLastBuyPrice
+		        .subtract(maxLastBuyPrice.multiply(moveStopPercentage).divide(HUNDRED, 2, RoundingMode.HALF_UP));
+	}
 }

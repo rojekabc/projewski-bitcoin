@@ -3,10 +3,11 @@ package pl.projewski.bitcoin.store.api.data;
 import java.math.BigDecimal;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class TransactionConfig {
-	private BigDecimal id;
+@EqualsAndHashCode(callSuper = true)
+public class TransactionConfig extends BaseConfig {
 	private String name;
 
 	private String baseCoin;
@@ -22,4 +23,6 @@ public class TransactionConfig {
 	private BigDecimal targetPercentage;
 
 	private BigDecimal zeroPrice;
+
+	private BigDecimal moveStopPercentage;
 }

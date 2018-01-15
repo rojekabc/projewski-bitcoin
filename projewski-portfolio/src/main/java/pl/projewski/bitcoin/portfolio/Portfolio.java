@@ -9,14 +9,15 @@ import java.util.Timer;
 
 import pl.projewski.bitcoin.bitbay.watcher.BitBayWatcher;
 import pl.projewski.bitcoin.common.Calculator;
+import pl.projewski.bitcoin.common.TransactionStatistics;
 import pl.projewski.bitcoin.common.interfaces.IExchangeWatcher;
+import pl.projewski.bitcoin.common.interfaces.IStatisticsDrawer;
 import pl.projewski.bitcoin.store.api.IStoreManager;
 import pl.projewski.bitcoin.store.api.data.TransactionConfig;
 import pl.projewski.bitcoin.store.api.data.WatcherConfig;
 import pl.projewski.bitcoin.ui.terminal.TerminalStatisticsDrawer;
 import pl.projewski.store.json.JsonStoreManager;
 
-// TODO: Divide to watcher and alarms - watcher only to observe statistics and alarm to put alarm, when something is go.
 public class Portfolio {
 	private final static BigDecimal HUNDRED = new BigDecimal("100");
 
@@ -25,7 +26,7 @@ public class Portfolio {
 		storeManager.load();
 		final List<WatcherConfig> watchers = storeManager.getWatchers();
 		for (final WatcherConfig watcherConfig : watchers) {
-			watcher.addConfiguration(watcherConfig);
+			watcher.addWatcher(watcherConfig);
 		}
 		final List<TransactionConfig> transactions = storeManager.getTransactions();
 		for (final TransactionConfig transactionConfig : transactions) {
@@ -35,13 +36,16 @@ public class Portfolio {
 
 	public static void main(final String[] args) {
 		final int updateSeconds = 20;
-		final IExchangeWatcher watcher = new BitBayWatcher(new TerminalStatisticsDrawer());
+		final IStatisticsDrawer statisticsDrawer = new TerminalStatisticsDrawer();
+		// force empty drawing
+		statisticsDrawer.updateStatistic((TransactionStatistics) null);
+		final IExchangeWatcher exchangeWatcher = new BitBayWatcher(statisticsDrawer);
 		final IStoreManager storeManager = JsonStoreManager.getInstance();
-		loadConfiguration(watcher, storeManager);
+		loadConfiguration(exchangeWatcher, storeManager);
 
 		while (true) {
 			final Timer timer = new Timer();
-			timer.schedule(new OneTask(watcher), 0, 1000 * updateSeconds);
+			timer.schedule(new OneTask(exchangeWatcher), 0, 1000 * updateSeconds);
 			try {
 				System.in.read();
 				timer.cancel();
@@ -68,26 +72,18 @@ public class Portfolio {
 						} else {
 							coin = split[1].toUpperCase();
 						}
-						WatcherConfig config = watcher.findConfiguration(coin);
+						final WatcherConfig config = storeManager.findWatcher(exchangeWatcher.getName(), coin);
 						if (config == null) {
 							// add new
-							config = new WatcherConfig();
-							config.setBaseCoin("PLN");
-							config.setCryptoCoin(coin);
-							config.setAmountTradeInStatistic(100);
-							watcher.addConfiguration(config);
-							storeManager.addWatcher(config);
-							System.out.println("Append configuration");
+							Commander.addWatcher(storeManager, exchangeWatcher, coin);
+							System.out.println("Append new watcher");
 						} else {
 							// remove existing
 							// TODO: If there's any open transaction - ask or
 							// don't allow
-							watcher.removeCoinConfiguration(config);
-							storeManager.removeWatcher(config);
-							System.out.println("Remove configuration");
+							Commander.removeWatcher(storeManager, exchangeWatcher, coin);
+							System.out.println("Remove watcher");
 						}
-						storeManager.store(); // TODO: Maybe some catch
-						                      // procedure
 						break;
 					}
 					case "buy": {
@@ -101,18 +97,21 @@ public class Portfolio {
 						System.out.print("Buy price [PLN]: ");
 						txConfig.setBuyPrice(new BigDecimal(scanner.nextLine()));
 						// zero price (stop zero)
-						txConfig.setZeroPrice(Calculator.zeroPrice(txConfig.getBuyPrice(), watcher.getFee()));
+						txConfig.setZeroPrice(Calculator.zeroPrice(txConfig.getBuyPrice(), exchangeWatcher.getFee()));
 
 						// stop price (stop loose)
 						System.out.print("Stop [%]: ");
 						txConfig.setStopPercentage(new BigDecimal(scanner.nextLine()));
 						txConfig.setStopPrice(Calculator.stopPrice(txConfig.getBuyPrice(), txConfig.getStopPercentage(),
-						        watcher.getFee()));
+						        exchangeWatcher.getFee()));
 						// target price (stop win)
 						System.out.print("Target [%]: ");
 						txConfig.setTargetPercentage(new BigDecimal(scanner.nextLine()));
 						txConfig.setTargetPrice(Calculator.targetPrice(txConfig.getBuyPrice(),
-						        txConfig.getTargetPercentage(), watcher.getFee()));
+						        txConfig.getTargetPercentage(), exchangeWatcher.getFee()));
+						// move stop
+						System.out.println("Move stop [%]: ");
+						txConfig.setMoveStopPercentage(new BigDecimal(scanner.nextLine()));
 
 						System.out.println("Stop price will be " + txConfig.getStopPrice() + ". You may loose "
 						        + txConfig.getInvest().multiply(txConfig.getStopPercentage()).divide(HUNDRED, 2,
@@ -120,34 +119,18 @@ public class Portfolio {
 						System.out.println("Target price will be " + txConfig.getTargetPrice() + ". You may win "
 						        + txConfig.getInvest().multiply(txConfig.getTargetPercentage()).divide(HUNDRED, 2,
 						                RoundingMode.HALF_UP));
-						watcher.addTransaction(txConfig);
-						storeManager.addTransaction(txConfig);
-						storeManager.store(); // TODO: Maybe some catch
-						                      // procedure
+						Commander.addTransaction(storeManager, exchangeWatcher, txConfig);
 						break;
 					}
 					case "sell": {
-						BigDecimal txId;
+						int txId;
 						if (split.length < 2) {
 							System.out.print("Tx Id:");
-							txId = new BigDecimal(scanner.nextLine());
+							txId = Integer.valueOf(scanner.nextLine());
 						} else {
-							txId = new BigDecimal(split[1]);
+							txId = Integer.valueOf(split[1]);
 						}
-						final List<TransactionConfig> transactions = storeManager.getTransactions();
-						TransactionConfig txToSell = null;
-						for (final TransactionConfig transaction : transactions) {
-							if (transaction.getId().equals(txId)) {
-								txToSell = transaction;
-								break;
-							}
-						}
-						if (txToSell == null) {
-							System.out.println("No transaction with id=" + txId);
-							break;
-						}
-						storeManager.removeTransaction(txToSell);
-						watcher.removeTransaction(txToSell);
+						Commander.removeTransaction(storeManager, exchangeWatcher, txId);
 						break;
 					}
 					case "start":

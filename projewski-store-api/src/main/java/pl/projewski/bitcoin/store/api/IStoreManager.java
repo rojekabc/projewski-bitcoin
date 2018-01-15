@@ -24,6 +24,8 @@ public interface IStoreManager {
 
 	void removeTransaction(TransactionConfig transaction);
 
+	WatcherConfig findWatcher(String exchangeName, String coin);
+
 	void store();
 
 	void load();

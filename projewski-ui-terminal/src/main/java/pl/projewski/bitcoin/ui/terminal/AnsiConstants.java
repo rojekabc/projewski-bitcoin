@@ -7,6 +7,7 @@ public class AnsiConstants {
 	public static final String FOREGROUNG_GRAY = "\033[0;37m";
 	public static final String FOREGROUNG_RED = "\033[0;31m";
 	public static final String FOREGROUNG_GREEN = "\033[0;32m";
+	public static final String FOREGROUNG_CYAN = "\033[0;36m";
 	public static final String FOREGROUNG_LIGHTRED = "\033[1;31m";
 	public static final String FOREGROUNG_LIGHTGREEN = "\033[1;32m";
 
