@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
+import pl.projewski.bitcoin.common.http.exceptions.HttpResponseStatusException;
 import pl.projewski.cryptogames.api.v1.CryptoGamesEndpoint;
 import pl.projewski.cryptogames.api.v1.PlaceBetRequest;
 import pl.projewski.cryptogames.api.v1.PlaceBetResponse;
@@ -99,8 +100,14 @@ public class Gambler {
 				}
 			}
 			// send the bet
-			final PlaceBetResponse response = endpoint.placebet(conf.getBetCoin(), conf.getPersonalApiKey(),
-			        createBetRequest(bet));
+			final PlaceBetResponse response;
+			try {
+				response = endpoint.placebet(conf.getBetCoin(), conf.getPersonalApiKey(), createBetRequest(bet));
+			} catch (final HttpResponseStatusException e) {
+				System.out.println("Http status: " + e.getStatusCode());
+				// retry
+				continue;
+			}
 			// System.out.println(response.toString());
 			// print the result
 			final BigDecimal profit = response.getProfit();
