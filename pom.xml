@@ -15,6 +15,7 @@
 		<module>projewski-ui-terminal</module>
 		<module>projewski-store-api</module>
 		<module>projewski-store-json</module>
+		<module>projewski-crypto-games</module>
 	</modules>
 
 	<dependencies>
