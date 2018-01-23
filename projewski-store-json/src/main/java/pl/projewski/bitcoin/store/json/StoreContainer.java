@@ -1,4 +1,4 @@
-package pl.projewski.store.json;
+package pl.projewski.bitcoin.store.json;
 
 import java.util.ArrayList;
 import java.util.List;

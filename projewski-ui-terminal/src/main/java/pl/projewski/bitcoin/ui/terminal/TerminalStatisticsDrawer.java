@@ -13,9 +13,9 @@ import pl.projewski.bitcoin.common.EStatisticState;
 import pl.projewski.bitcoin.common.IStatistics;
 import pl.projewski.bitcoin.common.TransactionStatistics;
 import pl.projewski.bitcoin.common.WatcherStatistics;
-import pl.projewski.bitcoin.common.interfaces.IStatisticsDrawer;
+import pl.projewski.bitcoin.ui.api.IStatisticsDrawer;
 
-public class TerminalStatisticsDrawer implements IStatisticsDrawer {
+class TerminalStatisticsDrawer implements IStatisticsDrawer {
 	private final static StatTableElement[] TABLE_ELEMENTS = { //
 	        new StatTableElement(10, "Watch", "watch"), //
 	        new StatTableElement(8, "Buys", "buyers"), //

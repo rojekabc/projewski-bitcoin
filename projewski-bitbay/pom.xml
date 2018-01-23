@@ -19,6 +19,16 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>pl.projewski.bitcoin</groupId>
+			<artifactId>projewski-ui-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>pl.projewski.bitcoin</groupId>
+			<artifactId>projewski-exchange-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	
 </project>

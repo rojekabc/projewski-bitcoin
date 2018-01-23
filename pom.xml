@@ -16,6 +16,9 @@
 		<module>projewski-store-api</module>
 		<module>projewski-store-json</module>
 		<module>projewski-crypto-games</module>
+		<module>projewski-ui-api</module>
+		<module>projewski-commander</module>
+		<module>projewski-exchange-api</module>
 	</modules>
 
 	<dependencies>

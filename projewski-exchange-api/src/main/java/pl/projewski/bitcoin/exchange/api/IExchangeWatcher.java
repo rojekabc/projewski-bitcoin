@@ -1,9 +1,10 @@
-package pl.projewski.bitcoin.common.interfaces;
+package pl.projewski.bitcoin.exchange.api;
 
 import java.math.BigDecimal;
 
 import pl.projewski.bitcoin.store.api.data.TransactionConfig;
 import pl.projewski.bitcoin.store.api.data.WatcherConfig;
+import pl.projewski.bitcoin.ui.api.IStatisticsDrawer;
 
 public interface IExchangeWatcher extends Runnable {
 	void addWatcher(final WatcherConfig config);
@@ -17,4 +18,8 @@ public interface IExchangeWatcher extends Runnable {
 	BigDecimal getFee();
 
 	String getName();
+
+	// TODO: Replace by some listener object, which will transfer this to
+	// statistics drawer. This allow eliminate dependency to ui-api
+	void setStatisticsDrawer(IStatisticsDrawer drawer);
 }

@@ -1,4 +1,4 @@
-package pl.projewski.store.json;
+package pl.projewski.bitcoin.store.json;
 
 import java.io.File;
 import java.io.FileReader;
@@ -20,7 +20,6 @@ import pl.projewski.bitcoin.store.api.exceptions.StoreException;
 public class JsonStoreManager implements IStoreManager {
 
 	private StoreContainer container = new StoreContainer();
-	private static JsonStoreManager instance = null;
 	private final static String filename = "pbsc.json";
 
 	private static final Comparator<TransactionConfig> TRANSACTION_SORTER = new Comparator<TransactionConfig>() {
@@ -30,14 +29,7 @@ public class JsonStoreManager implements IStoreManager {
 		}
 	};
 
-	private JsonStoreManager() {
-	}
-
-	public static synchronized JsonStoreManager getInstance() {
-		if (instance == null) {
-			instance = new JsonStoreManager();
-		}
-		return instance;
+	public JsonStoreManager() {
 	}
 
 	private int getNextFreeId(final List<? extends BaseConfig> configList) {

@@ -5,22 +5,17 @@
     <artifactId>projewski-bitcoin</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>projewski-ui-terminal</artifactId>
-  <name>Terminal User Interface</name>
+  <artifactId>projewski-exchange-api</artifactId>
+  <name>Exchange API</name>
   <dependencies>
   	<dependency>
-  		<groupId>commons-beanutils</groupId>
-  		<artifactId>commons-beanutils</artifactId>
-  		<version>1.9.3</version>
-  	</dependency>
-  	<dependency>
   		<groupId>pl.projewski.bitcoin</groupId>
-  		<artifactId>projewski-ui-api</artifactId>
+  		<artifactId>projewski-store-api</artifactId>
   		<version>0.0.1-SNAPSHOT</version>
   	</dependency>
   	<dependency>
   		<groupId>pl.projewski.bitcoin</groupId>
-  		<artifactId>projewski-commander</artifactId>
+  		<artifactId>projewski-ui-api</artifactId>
   		<version>0.0.1-SNAPSHOT</version>
   	</dependency>
   </dependencies>

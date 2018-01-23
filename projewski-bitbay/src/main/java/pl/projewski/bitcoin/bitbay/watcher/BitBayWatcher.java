@@ -8,26 +8,27 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import lombok.Setter;
 import pl.projewski.bitcoin.bitbay.api.v2.BitBayEndpoint;
 import pl.projewski.bitcoin.bitbay.api.v2.SortType;
 import pl.projewski.bitcoin.bitbay.api.v2.Trade;
 import pl.projewski.bitcoin.common.Calculator;
 import pl.projewski.bitcoin.common.TransactionStatistics;
 import pl.projewski.bitcoin.common.WatcherStatistics;
-import pl.projewski.bitcoin.common.interfaces.IExchangeWatcher;
-import pl.projewski.bitcoin.common.interfaces.IStatisticsDrawer;
+import pl.projewski.bitcoin.exchange.api.IExchangeWatcher;
 import pl.projewski.bitcoin.store.api.data.TransactionConfig;
 import pl.projewski.bitcoin.store.api.data.WatcherConfig;
+import pl.projewski.bitcoin.ui.api.IStatisticsDrawer;
 
 public class BitBayWatcher implements IExchangeWatcher {
 
 	private final Map<String, BitBayCoinWatch> watchMap = new HashMap<>();
-	private final IStatisticsDrawer statisticsDrawer;
+	@Setter
+	private IStatisticsDrawer statisticsDrawer;
 	private final static BigDecimal FEE = new BigDecimal("0.44");
 	private final static String NAME = "BitBay";
 
-	public BitBayWatcher(final IStatisticsDrawer statisticsDrawer) {
-		this.statisticsDrawer = statisticsDrawer;
+	public BitBayWatcher() {
 	}
 
 	@Override
