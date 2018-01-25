@@ -3,11 +3,13 @@
  */
 package pl.projewski.bitcoin.bitbay.exceptions;
 
+import pl.projewski.bitcoin.exchange.api.ExchangeException;
+
 /**
  * @author Piotr Rojewski <rojek_abc@o2.pl>
  *
  */
-public class BitBayException extends RuntimeException {
+public class BitBayException extends ExchangeException {
 
 	private static final long serialVersionUID = -7970157440935685501L;
 

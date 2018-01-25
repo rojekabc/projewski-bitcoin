@@ -36,12 +36,10 @@ public class Portfolio {
 		// set statistic drawer for watcher
 		final IExchangeWatcher exchangeWatcher = commander.getExchangeList().get(0);
 		exchangeWatcher.setStatisticsDrawer(statisticsDrawer);
-		// final IExchangeWatcher exchangeWatcher = new
-		// BitBayWatcher(statisticsDrawer);
 		loadConfiguration(exchangeWatcher, commander.getStoreManager());
 		// start timer
 		final Timer timer = new Timer();
-		timer.schedule(new OneTask(exchangeWatcher), 1000, 1000 * updateSeconds);
+		timer.schedule(new OneTask(exchangeWatcher), 250, 1000 * updateSeconds);
 		// start user interface
 		userInterface.start(args);
 

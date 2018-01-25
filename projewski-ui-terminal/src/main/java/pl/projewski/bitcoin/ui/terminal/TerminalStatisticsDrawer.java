@@ -5,14 +5,19 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 
+import lombok.Setter;
 import pl.projewski.bitcoin.common.EStatisticState;
 import pl.projewski.bitcoin.common.IStatistics;
 import pl.projewski.bitcoin.common.TransactionStatistics;
 import pl.projewski.bitcoin.common.WatcherStatistics;
+import pl.projewski.bitcoin.store.api.data.BaseConfig;
+import pl.projewski.bitcoin.store.api.data.TransactionConfig;
+import pl.projewski.bitcoin.store.api.data.WatcherConfig;
 import pl.projewski.bitcoin.ui.api.IStatisticsDrawer;
 
 class TerminalStatisticsDrawer implements IStatisticsDrawer {
@@ -41,6 +46,8 @@ class TerminalStatisticsDrawer implements IStatisticsDrawer {
 
 	private final List<WatcherStatistics> watcherStats = new ArrayList<>();
 	private final List<TransactionStatistics> txStats = new ArrayList<>();
+	@Setter
+	private boolean lockDraw = false;
 
 	private void updateStatistics() {
 		System.out.print(AnsiConstants.CLEAR_SCREEN); // clearscreen
@@ -314,13 +321,17 @@ class TerminalStatisticsDrawer implements IStatisticsDrawer {
 	@Override
 	public void updateStatistic(final WatcherStatistics statistic) {
 		addConfiguration(watcherStats, statistic);
-		updateStatistics();
+		if (!lockDraw) {
+			updateStatistics();
+		}
 	}
 
 	@Override
 	public void updateStatistic(final TransactionStatistics statistic) {
 		addConfiguration(txStats, statistic);
-		updateStatistics();
+		if (!lockDraw) {
+			updateStatistics();
+		}
 	}
 
 	private <T extends IStatistics> void addConfiguration(final List<T> list, final T stats) {
@@ -334,6 +345,26 @@ class TerminalStatisticsDrawer implements IStatisticsDrawer {
 			}
 		}
 		list.add(stats);
+	}
+
+	private <T extends IStatistics> void removeConfiguration(final List<T> list, final BaseConfig config) {
+		if (config == null) {
+			return;
+		}
+		list.stream() //
+		        .filter(stat -> Objects.equals(stat.getConfigurationId(), config.getId())) //
+		        .findFirst().ifPresent(stat -> list.remove(stat));
+		;
+	}
+
+	@Override
+	public void removeTransaction(final TransactionConfig transaction) {
+		removeConfiguration(txStats, transaction);
+	}
+
+	@Override
+	public void removeWatcher(final WatcherConfig watcher) {
+		removeConfiguration(watcherStats, watcher);
 	}
 
 }

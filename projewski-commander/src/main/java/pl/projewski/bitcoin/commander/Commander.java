@@ -3,12 +3,15 @@ package pl.projewski.bitcoin.commander;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.ServiceLoader;
 
 import lombok.Getter;
-import pl.projewski.bitcoin.commander.exceptions.StoreNotConfiguredCommanderException;
+import pl.projewski.bitcoin.commander.exceptions.ExchangeNotFoundCommanderException;
+import pl.projewski.bitcoin.commander.exceptions.StoreNotFoundCommanderException;
 import pl.projewski.bitcoin.commander.exceptions.StoreTooManyCommanderException;
-import pl.projewski.bitcoin.commander.exceptions.UINotConfiguredCommanderException;
+import pl.projewski.bitcoin.commander.exceptions.TransactionNotFoundCommanderException;
+import pl.projewski.bitcoin.commander.exceptions.UINotFoundCommanderException;
 import pl.projewski.bitcoin.commander.exceptions.UITooManyCommanderException;
 import pl.projewski.bitcoin.exchange.api.IExchangeWatcher;
 import pl.projewski.bitcoin.store.api.IStoreManager;
@@ -47,7 +50,7 @@ public class Commander {
 			}
 		}
 		if (storeManager == null) {
-			throw new StoreNotConfiguredCommanderException();
+			throw new StoreNotFoundCommanderException();
 		}
 		// load list of exchanges
 		final ServiceLoader<IExchangeWatcher> exchangeServiceLoader = ServiceLoader.load(IExchangeWatcher.class);
@@ -66,7 +69,7 @@ public class Commander {
 			}
 		}
 		if (userInterface == null) {
-			throw new UINotConfiguredCommanderException();
+			throw new UINotFoundCommanderException();
 		}
 	}
 
@@ -77,9 +80,9 @@ public class Commander {
 		watcher.setAmountTradeInStatistic(100);
 		watcher.setBaseCoin("PLN");
 		watcher.setCryptoCoin(coin.toUpperCase());
+		exchangeWatcher.addWatcher(watcher);
 		storeManager.addWatcher(watcher);
 		storeManager.store();
-		exchangeWatcher.addWatcher(watcher);
 		return watcher;
 	}
 
@@ -88,6 +91,7 @@ public class Commander {
 		final WatcherConfig watcher = storeManager.findWatcher(exchangeWatcher.getName(), coin);
 		if (watcher != null) {
 			exchangeWatcher.removeWatcher(watcher);
+			userInterface.getStatisticDrawer().removeWatcher(watcher);
 			storeManager.removeWatcher(watcher);
 			storeManager.store();
 		}
@@ -104,8 +108,12 @@ public class Commander {
 		storeManager.store();
 	}
 
-	public void removeTransaction(final IStoreManager storeManager, final IExchangeWatcher exchangeWatcher,
-	        final int txId) {
+	public IExchangeWatcher findExchange(final String name) {
+		return this.exchangeList.stream().filter(exchange -> Objects.equals(exchange.getName(), name)).findFirst()
+		        .orElseThrow(() -> new ExchangeNotFoundCommanderException());
+	}
+
+	public void removeTransaction(final int txId) {
 		final List<TransactionConfig> transactions = storeManager.getTransactions();
 		TransactionConfig txToSell = null;
 		for (final TransactionConfig transaction : transactions) {
@@ -115,10 +123,12 @@ public class Commander {
 			}
 		}
 		if (txToSell == null) {
-			return; // TODO: Maybe some Exception
+			throw new TransactionNotFoundCommanderException();
 		}
-		storeManager.removeTransaction(txToSell);
+		final IExchangeWatcher exchangeWatcher = findExchange(txToSell.getExchange());
 		exchangeWatcher.removeTransaction(txToSell);
+		userInterface.getStatisticDrawer().removeTransaction(txToSell);
+		storeManager.removeTransaction(txToSell);
 		storeManager.store();
 	}
 }

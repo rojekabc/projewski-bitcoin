@@ -4,4 +4,8 @@ public class StoreTooManyCommanderException extends CommanderException {
 
 	private static final long serialVersionUID = -6732261004893303366L;
 
+	public StoreTooManyCommanderException() {
+		super("Too many store services");
+	}
+
 }

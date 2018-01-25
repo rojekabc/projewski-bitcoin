@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class TransactionConfig extends BaseConfig {
 	private String name;
+	private String exchange;
 
 	private String baseCoin;
 	private String cryptoCoin;

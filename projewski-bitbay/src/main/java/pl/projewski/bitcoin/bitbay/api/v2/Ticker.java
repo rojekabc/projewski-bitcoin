@@ -18,4 +18,7 @@ public class Ticker {
 	// srednia z 3 najlepszych ofert sprzedazy (always same as last)
 	private String average;
 	private String volume;
+
+	private String message;
+	private int code;
 }
