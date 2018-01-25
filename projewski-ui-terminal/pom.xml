@@ -3,7 +3,7 @@
   <parent>
     <groupId>pl.projewski.bitcoin</groupId>
     <artifactId>projewski-bitcoin</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
   </parent>
   <artifactId>projewski-ui-terminal</artifactId>
   <name>Terminal User Interface</name>
@@ -16,12 +16,12 @@
   	<dependency>
   		<groupId>pl.projewski.bitcoin</groupId>
   		<artifactId>projewski-ui-api</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
+  		<version>0.0.1</version>
   	</dependency>
   	<dependency>
   		<groupId>pl.projewski.bitcoin</groupId>
   		<artifactId>projewski-commander</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
+  		<version>0.0.1</version>
   	</dependency>
   </dependencies>
 </project>

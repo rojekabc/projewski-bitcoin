@@ -3,7 +3,7 @@
   <parent>
     <groupId>pl.projewski.bitcoin</groupId>
     <artifactId>projewski-bitcoin</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
   </parent>
   <artifactId>projewski-common</artifactId>
   <name>Common Library</name>
@@ -11,7 +11,7 @@
   	<dependency>
   		<groupId>pl.projewski.bitcoin</groupId>
   		<artifactId>projewski-store-api</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
+  		<version>0.0.1</version>
   	</dependency>
   </dependencies>
 </project>

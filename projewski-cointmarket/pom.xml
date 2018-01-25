@@ -3,7 +3,7 @@
   <parent>
     <groupId>pl.projewski.bitcoin</groupId>
     <artifactId>projewski-bitcoin</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
   </parent>
   <artifactId>projewski-cointmarket</artifactId>
   <dependencies>
