@@ -1,5 +1,7 @@
 package pl.projewski.bitcoin.exchange.binance;
 
+import lombok.Getter;
+import lombok.Setter;
 import pl.projewski.bitcoin.exchange.api.*;
 import pl.projewski.bitcoin.exchange.binance.api.v1.BinanceEndpoint;
 import pl.projewski.bitcoin.exchange.binance.api.v1.ExchangeInfo;
@@ -11,6 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BinanceExchange implements IExchange {
+    @Getter
+    @Setter
+    private String baseCoin = "BTC";
+
     BinanceEndpoint binance = new BinanceEndpoint();
 
     @Override

@@ -1,5 +1,7 @@
 package pl.projewski.bitcoin.exchange.bitbay;
 
+import lombok.Getter;
+import lombok.Setter;
 import pl.projewski.bitcoin.exchange.api.*;
 import pl.projewski.bitcoin.exchange.bitbay.api.v2.BitBayEndpoint;
 import pl.projewski.bitcoin.exchange.bitbay.api.v2.Ticker;
@@ -20,6 +22,11 @@ public class BitbayExchange implements IExchange {
     };
 
     private final BitBayEndpoint bitbay = new BitBayEndpoint();
+
+    @Getter
+    @Setter
+    private String baseCoin = "PLN";
+
 
     @Override
     public List<Market> getMarketList() {
@@ -64,10 +71,12 @@ public class BitbayExchange implements IExchange {
         Order o;
         final pl.projewski.bitcoin.exchange.bitbay.api.v2.OrderBook bitbayOrderBook = bitbay.getOrderBook(symbol);
         final List<Order> asks = new ArrayList<>();
-        bitbayOrderBook.getAsks().forEach(bitBayOrder -> asks.add(new Order(bitBayOrder.getPrice(), bitBayOrder.getQuantity())));
+        bitbayOrderBook.getAsks()
+                .forEach(bitBayOrder -> asks.add(new Order(bitBayOrder.getPrice(), bitBayOrder.getQuantity())));
         result.setAskOrders(asks);
         final List<Order> bids = new ArrayList<>();
-        bitbayOrderBook.getBids().forEach(bitBayOrder -> bids.add(new Order(bitBayOrder.getPrice(), bitBayOrder.getQuantity())));
+        bitbayOrderBook.getBids()
+                .forEach(bitBayOrder -> bids.add(new Order(bitBayOrder.getPrice(), bitBayOrder.getQuantity())));
         result.setBidOrders(bids);
         return result;
     }

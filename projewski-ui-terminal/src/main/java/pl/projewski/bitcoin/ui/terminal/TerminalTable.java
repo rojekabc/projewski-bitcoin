@@ -138,9 +138,9 @@ public class TerminalTable {
         if (state != null) {
             switch (state) {
                 case MINUS:
-                    return AnsiConstants.FOREGROUNG_GRAY + " -";
+                    return AnsiConstants.FOREGROUNG_RED + " -";
                 case PLUS:
-                    return AnsiConstants.FOREGROUNG_GRAY + " +";
+                    return AnsiConstants.FOREGROUNG_GREEN + " +";
                 case ZERO:
                     return AnsiConstants.FOREGROUNG_GRAY + "  ";
             }

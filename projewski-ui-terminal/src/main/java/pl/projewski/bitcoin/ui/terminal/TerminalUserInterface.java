@@ -13,6 +13,8 @@ import pl.projewski.bitcoin.store.api.data.TransactionConfig;
 import pl.projewski.bitcoin.store.api.data.WatcherConfig;
 import pl.projewski.bitcoin.ui.api.IStatisticsDrawer;
 import pl.projewski.bitcoin.ui.api.IUserInterface;
+import pl.projewski.bitcoin.ui.terminal.exceptions.TerminalException;
+import pl.projewski.bitcoin.ui.terminal.exceptions.UnknownExchangeTerminalException;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -23,8 +25,7 @@ import java.util.Scanner;
 
 public class TerminalUserInterface implements IUserInterface {
     private final static BigDecimal HUNDRED = new BigDecimal("100");
-
-    TerminalStatisticsDrawer statisticDrawer = new TerminalStatisticsDrawer();
+    final TerminalStatisticsDrawer statisticDrawer = TerminalStatisticsDrawer.getInstance();
 
     public TerminalUserInterface() {
     }
@@ -34,16 +35,17 @@ public class TerminalUserInterface implements IUserInterface {
         final Commander commander = Commander.getInstance();
         final IStoreManager storeManager = commander.getStoreManager();
         final ExchangeManager exchangeManager = ExchangeManager.getInstance();
+
         final List<String> exchanges = exchangeManager.getExchanges();
-        final IExchange exchange = exchangeManager.getExchangeByName(exchanges.get(0));
-        statisticDrawer.updateStatistic((TransactionStatistics) null);
+        IExchange exchange = exchangeManager.getExchangeByName(exchanges.get(0));
+        statisticDrawer.draw();
 
         while (true) {
             try {
                 System.in.read();
-                statisticDrawer.setLockDraw(true);
+                statisticDrawer.lockDraw();
                 final Scanner scanner = new Scanner(System.in);
-                System.out.print("> ");
+                System.out.print(exchange.getName() + " > ");
                 input:
                 while (scanner.hasNext()) {
                     try {
@@ -56,11 +58,25 @@ public class TerminalUserInterface implements IUserInterface {
                                 System.out.println("\tbuy\t\topen coin transaction and append alarms");
                                 System.out.println("\tsell\t\tclear stop/target for coin transaction");
                                 System.out.println("\tstart\t\tstart watchers and alarms");
+                                System.out.println("\tswitch\t\tchange default exchange");
                                 System.out.println("\tquit\t\tend application working");
                                 break;
                             }
-                            // TODO: switch between exchange
                             case "switch": {
+                                final String exchangeName;
+                                if (split.length < 2) {
+                                    System.out.println("Available exchanges: ");
+                                    exchanges.stream().forEach(System.out::println);
+                                    System.out.print("Exchange name: ");
+                                    exchangeName = scanner.nextLine().toUpperCase();
+                                } else {
+                                    exchangeName = split[1].toUpperCase();
+                                }
+                                final String selected = exchanges.stream()
+                                        .filter(exn -> exn.toUpperCase().equals(exchangeName))
+                                        .findFirst()
+                                        .orElseThrow(UnknownExchangeTerminalException::new);
+                                exchange = exchangeManager.getExchangeByName(selected);
                                 break;
                             }
                             case "watch": {
@@ -78,7 +94,7 @@ public class TerminalUserInterface implements IUserInterface {
                                     // add new
                                     config = new WatcherConfig();
                                     config.setExchangeName(exchange.getName());
-                                    config.setBaseCoin("PLN");
+                                    config.setBaseCoin(exchange.getBaseCoin());
                                     config.setCryptoCoin(coin);
                                     commander.addWatcher(config);
                                     System.out.println("Append new watcher");
@@ -122,8 +138,7 @@ public class TerminalUserInterface implements IUserInterface {
                                 System.out
                                         .println("Target price will be " + txConfig.getTargetPrice() + ". You may win "
                                                 + txConfig.getInvest().multiply(txConfig.getTargetPercentage())
-                                                .divide(HUNDRED, 2,
-                                                        RoundingMode.HALF_UP));
+                                                .divide(HUNDRED, 2, RoundingMode.HALF_UP));
                                 commander.addTransaction(txConfig);
                                 break;
                             }
@@ -138,7 +153,7 @@ public class TerminalUserInterface implements IUserInterface {
                                 break;
                             }
                             case "start":
-                                statisticDrawer.setLockDraw(false);
+                                statisticDrawer.unlockDraw();
                                 statisticDrawer.updateStatistic((TransactionStatistics) null);
                                 break input;
                             case "exit":
@@ -149,10 +164,10 @@ public class TerminalUserInterface implements IUserInterface {
                                 System.out.println("Unrecognized command");
                                 break;
                         }
-                    } catch (final ExchangeException | CommanderException e) {
+                    } catch (final ExchangeException | CommanderException | TerminalException e) {
                         System.out.println(e.getMessage());
                     }
-                    System.out.print("> ");
+                    System.out.print(exchange.getName() + " > ");
                 }
             } catch (final IOException e) {
                 e.printStackTrace();

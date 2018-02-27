@@ -1,10 +1,8 @@
 package pl.projewski.bitcoin.ui.terminal;
 
-import lombok.Setter;
 import pl.projewski.bitcoin.common.IStatistics;
 import pl.projewski.bitcoin.common.TransactionStatistics;
 import pl.projewski.bitcoin.common.WatcherStatistics;
-import pl.projewski.bitcoin.exchange.manager.MarketWatcherListener;
 import pl.projewski.bitcoin.store.api.data.BaseConfig;
 import pl.projewski.bitcoin.store.api.data.TransactionConfig;
 import pl.projewski.bitcoin.store.api.data.WatcherConfig;
@@ -16,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class TerminalStatisticsDrawer implements IStatisticsDrawer, MarketWatcherListener {
+public class TerminalStatisticsDrawer implements IStatisticsDrawer {
     final TerminalTable marketTable = new TerminalTable()
             .title("Markets")
             .header("Market", 20)
@@ -42,17 +40,17 @@ public class TerminalStatisticsDrawer implements IStatisticsDrawer, MarketWatche
 
     private final List<WatcherStatistics> watcherStats = new ArrayList<>();
     private final List<TransactionStatistics> txStats = new ArrayList<>();
-    @Setter
     private boolean lockDraw = false;
+    private static TerminalStatisticsDrawer instance;
 
-    private void updateStatistics() {
-        System.out.print(AnsiConstants.CLEAR_SCREEN); // clearscreen
-        System.out.print(AnsiConstants.GOTO_BEGIN); // gotoxy 0,0
-        drawWatcherTable();
-        System.out.println();
-        drawTransactionTable();
-        System.out.println("Last update time " + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()));
-        System.out.println("Press <Enter> to put command");
+    public static TerminalStatisticsDrawer getInstance() {
+        if (instance == null) {
+            instance = new TerminalStatisticsDrawer();
+        }
+        return instance;
+    }
+
+    private TerminalStatisticsDrawer() {
     }
 
     private void drawWatcherTable() {
@@ -101,7 +99,7 @@ public class TerminalStatisticsDrawer implements IStatisticsDrawer, MarketWatche
     public void updateStatistic(final WatcherStatistics statistic) {
         addConfiguration(watcherStats, statistic);
         if (!lockDraw) {
-            updateStatistics();
+            draw();
         }
     }
 
@@ -109,27 +107,9 @@ public class TerminalStatisticsDrawer implements IStatisticsDrawer, MarketWatche
     public void updateStatistic(final TransactionStatistics statistic) {
         addConfiguration(txStats, statistic);
         if (!lockDraw) {
-            updateStatistics();
+            draw();
         }
     }
-
-    @Override
-    public void informError(final String configSymbol, final Exception e) {
-        System.out.println("Config " + configSymbol + " has error " + e.getMessage());
-        e.printStackTrace();
-    }
-
-//    @Override
-//    public void informException(final Exception e) {
-//        System.out.print(AnsiConstants.CLEAR_SCREEN); // clearscreen
-//        System.out.print(AnsiConstants.GOTO_BEGIN); // gotoxy 0,0
-//
-//        e.printStackTrace();
-//
-//        System.out.println("Last update time " + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()));
-//        System.out.println("Press <Enter> to put command");
-//    }
-//
 
     private <T extends IStatistics> void addConfiguration(final List<T> list, final T stats) {
         if (stats == null) {
@@ -152,6 +132,27 @@ public class TerminalStatisticsDrawer implements IStatisticsDrawer, MarketWatche
                 .filter(stat -> Objects.equals(stat.getConfigurationId(), config.getId())) //
                 .findFirst().ifPresent(stat -> list.remove(stat));
         ;
+    }
+
+    @Override
+    public void draw() {
+        System.out.print(AnsiConstants.CLEAR_SCREEN); // clearscreen
+        System.out.print(AnsiConstants.GOTO_BEGIN); // gotoxy 0,0
+        drawWatcherTable();
+        System.out.println();
+        drawTransactionTable();
+        System.out.println("Last update time " + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()));
+        System.out.println("Press <Enter> to put command");
+    }
+
+    @Override
+    public void lockDraw() {
+        lockDraw = true;
+    }
+
+    @Override
+    public void unlockDraw() {
+        lockDraw = false;
     }
 
     @Override

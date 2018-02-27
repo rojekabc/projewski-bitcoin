@@ -35,7 +35,10 @@ class MarketWatcher implements Runnable {
             tradeQuantity = tradeQuantity.add(trade.getQuantity());
             tradeAvgPrice = tradeAvgPrice.add(trade.getPrice().multiply(trade.getQuantity()));
         }
-        tradeAvgPrice = tradeAvgPrice.divide(tradeQuantity, 2, RoundingMode.HALF_UP);
+        final int priceCompareTen = tradePrice.compareTo(BigDecimal.TEN);
+        final int priceCompareOne = tradePrice.compareTo(BigDecimal.ONE);
+        final int scale = priceCompareTen > 0 ? 2 : priceCompareOne > 0 ? 6 : 8;
+        tradeAvgPrice = tradeAvgPrice.divide(tradeQuantity, scale, RoundingMode.HALF_UP);
         stats.setTrade(tradePrice, tradeQuantity, tradeAvgPrice);
 
         // calculate order buy statistics
@@ -50,7 +53,7 @@ class MarketWatcher implements Runnable {
             buyQuantity = buyQuantity.add(order.getQuantity());
             buyAvgPrice = buyAvgPrice.add(order.getPrice().multiply(order.getQuantity()));
         }
-        buyAvgPrice = buyAvgPrice.divide(buyQuantity, 2, RoundingMode.HALF_UP);
+        buyAvgPrice = buyAvgPrice.divide(buyQuantity, scale, RoundingMode.HALF_UP);
         stats.setOrderBuy(buyBestPrice, buyQuantity, buyAvgPrice);
 
         // calculate order sell statistics
@@ -65,7 +68,7 @@ class MarketWatcher implements Runnable {
             sellQuantity = sellQuantity.add(order.getQuantity());
             sellAvgPrice = sellAvgPrice.add(order.getPrice().multiply(order.getQuantity()));
         }
-        sellAvgPrice = sellAvgPrice.divide(sellQuantity, 2, RoundingMode.HALF_UP);
+        sellAvgPrice = sellAvgPrice.divide(sellQuantity, scale, RoundingMode.HALF_UP);
         stats.setOrderSell(sellBestPrice, sellQuantity, sellAvgPrice);
         coinWatch.getLastStatistics().updateStatitics(stats);
     }
