@@ -18,3 +18,7 @@ buildNumber.properties
 
 # Release packages
 *.7z
+
+# Idea IntelliJ
+.idea
+*.iml

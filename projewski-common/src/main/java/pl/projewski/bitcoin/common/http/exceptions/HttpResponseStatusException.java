@@ -12,6 +12,11 @@ public class HttpResponseStatusException extends RuntimeException {
 		this.statusCode = status;
 	}
 
+	public HttpResponseStatusException(final int status, final String message) {
+		super(message);
+		this.statusCode = status;
+	}
+
 	public HttpResponseStatusException(final String message) {
 		super(message);
 	}

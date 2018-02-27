@@ -1,370 +1,167 @@
 package pl.projewski.bitcoin.ui.terminal;
 
-import java.lang.reflect.InvocationTargetException;
+import lombok.Setter;
+import pl.projewski.bitcoin.common.IStatistics;
+import pl.projewski.bitcoin.common.TransactionStatistics;
+import pl.projewski.bitcoin.common.WatcherStatistics;
+import pl.projewski.bitcoin.exchange.manager.MarketWatcherListener;
+import pl.projewski.bitcoin.store.api.data.BaseConfig;
+import pl.projewski.bitcoin.store.api.data.TransactionConfig;
+import pl.projewski.bitcoin.store.api.data.WatcherConfig;
+import pl.projewski.bitcoin.ui.api.IStatisticsDrawer;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.commons.beanutils.BeanUtilsBean;
-import org.apache.commons.beanutils.PropertyUtilsBean;
+public class TerminalStatisticsDrawer implements IStatisticsDrawer, MarketWatcherListener {
+    final TerminalTable marketTable = new TerminalTable()
+            .title("Markets")
+            .header("Market", 20)
+            .header("Trade price", 13)
+            .header("Trade qty", 20)
+            .header("Trade avg", 13)
+            .header("Buy price", 13)
+            .header("Buy qty", 20)
+            .header("Buy avg", 13)
+            .header("Sell price", 13)
+            .header("Sell qty", 20)
+            .header("Sell avg", 13);
+    final TerminalTable txTable = new TerminalTable()
+            .title("Transactions")
+            .header("Id", 6)
+            .header("Market", 20)
+            .header("Invest", 10)
+            .header("Buy price", 10)
+            .header("Stop price", 10)
+            .header("Zero price", 10)
+            .header("Target price", 10)
+            .header("Move sotp", 10);
 
-import lombok.Setter;
-import pl.projewski.bitcoin.common.EStatisticState;
-import pl.projewski.bitcoin.common.IStatistics;
-import pl.projewski.bitcoin.common.TransactionStatistics;
-import pl.projewski.bitcoin.common.WatcherStatistics;
-import pl.projewski.bitcoin.store.api.data.BaseConfig;
-import pl.projewski.bitcoin.store.api.data.TransactionConfig;
-import pl.projewski.bitcoin.store.api.data.WatcherConfig;
-import pl.projewski.bitcoin.ui.api.IStatisticsDrawer;
+    private final List<WatcherStatistics> watcherStats = new ArrayList<>();
+    private final List<TransactionStatistics> txStats = new ArrayList<>();
+    @Setter
+    private boolean lockDraw = false;
 
-class TerminalStatisticsDrawer implements IStatisticsDrawer {
-	private final static StatTableElement[] TABLE_ELEMENTS = { //
-	        new StatTableElement(10, "Watch", "watch"), //
-	        new StatTableElement(8, "Buys", "buyers"), //
-	        new StatTableElement(8, "Sells", "sellers"), //
-	        new StatTableElement(23, "Bought", "amountBought"), //
-	        new StatTableElement(23, "Sold", "amountSold"), //
-	        new StatTableElement(13, "Last buy", "lastBuyPrice"), //
-	        new StatTableElement(13, "Last sell", "lastSellPrice"), //
-	        new StatTableElement(13, "Avg buy", "buyerAverage"), //
-	        new StatTableElement(13, "Avg sell", "sellerAverage") //
-	};
+    private void updateStatistics() {
+        System.out.print(AnsiConstants.CLEAR_SCREEN); // clearscreen
+        System.out.print(AnsiConstants.GOTO_BEGIN); // gotoxy 0,0
+        drawWatcherTable();
+        System.out.println();
+        drawTransactionTable();
+        System.out.println("Last update time " + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()));
+        System.out.println("Press <Enter> to put command");
+    }
 
-	private final static StatTableElement[] TX_TABLE_ELEMENTS = { //
-	        new StatTableElement(5, "Id", "config.id"), //
-	        new StatTableElement(5, "Coin", "config.cryptoCoin"), //
-	        new StatTableElement(10, "Invest", "config.invest"), //
-	        new StatTableElement(10, "Buy price", "config.buyPrice"), //
-	        new StatTableElement(10, "Stop price", "config.stopPrice"), //
-	        new StatTableElement(10, "Zero price", "config.zeroPrice"), //
-	        new StatTableElement(10, "Target price", "config.targetPrice"), //
-	        new StatTableElement(10, "Move stop price", "moveStopPrice") //
-	};
+    private void drawWatcherTable() {
+        marketTable.reset();
+        for (final WatcherStatistics statistics : watcherStats) {
+            marketTable
+                    .data(statistics.getConfig().getConfigSymbol())
+                    .data(statistics.getTradeLastPrice())
+                    .data(statistics.getTradeQuantity())
+                    .data(statistics.getTradeAvgPrice())
+                    .data(statistics.getOrderBuyBestPrice())
+                    .data(statistics.getOrderBuyQuantity())
+                    .data(statistics.getOrderBuyAvgPrice())
+                    .data(statistics.getOrderSellBestPrice())
+                    .data(statistics.getOrderSellQuantity())
+                    .data(statistics.getOrderSellAvgPrice());
+        }
+        marketTable.draw();
+    }
 
-	private final List<WatcherStatistics> watcherStats = new ArrayList<>();
-	private final List<TransactionStatistics> txStats = new ArrayList<>();
-	@Setter
-	private boolean lockDraw = false;
+    private boolean getBoolean(final Boolean b) {
+        return b == null ? false : b.booleanValue();
+    }
 
-	private void updateStatistics() {
-		System.out.print(AnsiConstants.CLEAR_SCREEN); // clearscreen
-		System.out.print(AnsiConstants.GOTO_BEGIN); // gotoxy 0,0
+    private void drawTransactionTable() {
+        txTable.reset();
+        for (final TransactionStatistics statistics : txStats) {
+            txTable
+                    .data(Integer.toString(statistics.getConfigurationId()))
+                    .data(statistics.getConfig().getMarketSymbol())
+                    .data(statistics.getConfig().getInvest())
+                    .data(statistics.getConfig().getBuyPrice())
+                    .data(statistics.getConfig().getStopPrice(), getBoolean(
+                            statistics.getStopAlarm()) ? AnsiConstants.FOREGROUNG_RED : AnsiConstants.FOREGROUNG_GRAY)
+                    .data(statistics.getConfig().getZeroPrice(), getBoolean(
+                            statistics.getZeroAlarm()) ? AnsiConstants.FOREGROUNG_GREEN : AnsiConstants.FOREGROUNG_GRAY)
+                    .data(statistics.getConfig().getTargetPrice(), getBoolean(statistics
+                            .getTargetAlarm()) ? AnsiConstants.FOREGROUNG_GREEN : AnsiConstants.FOREGROUNG_GRAY)
+                    .data(statistics.getMoveStopPrice(), getBoolean(statistics
+                            .getMoveStopAlarm()) ? AnsiConstants.FOREGROUNG_RED : AnsiConstants.FOREGROUNG_GRAY);
+        }
+        txTable.draw();
+    }
 
-		System.out.println("--- Watchers ---");
-		drawWatcherTable(TABLE_ELEMENTS, watcherStats);
+    @Override
+    public void updateStatistic(final WatcherStatistics statistic) {
+        addConfiguration(watcherStats, statistic);
+        if (!lockDraw) {
+            updateStatistics();
+        }
+    }
 
-		System.out.println();
-		System.out.println("--- Transactions ---");
-		drawTransactionTable(TX_TABLE_ELEMENTS, txStats);
+    @Override
+    public void updateStatistic(final TransactionStatistics statistic) {
+        addConfiguration(txStats, statistic);
+        if (!lockDraw) {
+            updateStatistics();
+        }
+    }
 
-		System.out.println("Last update time " + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()));
-		System.out.println("Press <Enter> to put command");
-	}
+    @Override
+    public void informError(final String configSymbol, final Exception e) {
+        System.out.println("Config " + configSymbol + " has error " + e.getMessage());
+        e.printStackTrace();
+    }
 
-	@Override
-	public void informException(final Exception e) {
-		System.out.print(AnsiConstants.CLEAR_SCREEN); // clearscreen
-		System.out.print(AnsiConstants.GOTO_BEGIN); // gotoxy 0,0
+//    @Override
+//    public void informException(final Exception e) {
+//        System.out.print(AnsiConstants.CLEAR_SCREEN); // clearscreen
+//        System.out.print(AnsiConstants.GOTO_BEGIN); // gotoxy 0,0
+//
+//        e.printStackTrace();
+//
+//        System.out.println("Last update time " + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()));
+//        System.out.println("Press <Enter> to put command");
+//    }
+//
 
-		e.printStackTrace();
+    private <T extends IStatistics> void addConfiguration(final List<T> list, final T stats) {
+        if (stats == null) {
+            return;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getConfigurationId() == stats.getConfigurationId()) {
+                list.set(i, stats);
+                return;
+            }
+        }
+        list.add(stats);
+    }
 
-		System.out.println("Last update time " + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()));
-		System.out.println("Press <Enter> to put command");
-	}
+    private <T extends IStatistics> void removeConfiguration(final List<T> list, final BaseConfig config) {
+        if (config == null) {
+            return;
+        }
+        list.stream() //
+                .filter(stat -> Objects.equals(stat.getConfigurationId(), config.getId())) //
+                .findFirst().ifPresent(stat -> list.remove(stat));
+        ;
+    }
 
-	private void drawWatcherTable(final StatTableElement[] tableElements, final List<WatcherStatistics> statsArray) {
-		final StringBuilder lineBuilder = new StringBuilder();
-		// title
-		lineBuilder.append(AnsiConstants.FOREGROUNG_GRAY);
-		lineBuilder.append('|');
-		for (final StatTableElement element : tableElements) {
-			lineBuilder.append(AnsiConstants.FOREGROUNG_WHITE);
-			int fieldSize = element.getFieldSize();
-			final String fieldValue = element.getFieldTitle();
-			fieldSize -= fieldValue.length();
-			while (fieldSize > 0) {
-				lineBuilder.append(' ');
-				fieldSize--;
-			}
-			lineBuilder.append(fieldSize >= 0 ? fieldValue : fieldValue.substring(0, fieldValue.length() + fieldSize));
-			lineBuilder.append(AnsiConstants.FOREGROUNG_GRAY);
-			lineBuilder.append('|');
-		}
-		lineBuilder.append(System.lineSeparator());
-		// line
-		lineBuilder.append('+');
-		for (final StatTableElement element : tableElements) {
-			int fieldSize = element.getFieldSize();
-			while (fieldSize > 0) {
-				lineBuilder.append('-');
-				fieldSize--;
-			}
-			lineBuilder.append('+');
-		}
-		lineBuilder.append(System.lineSeparator());
-		// statistics
-		for (final WatcherStatistics stats : statsArray) {
-			lineBuilder.append(AnsiConstants.FOREGROUNG_GRAY);
-			lineBuilder.append('|');
-			for (final StatTableElement element : tableElements) {
-				int fieldSize = element.getFieldSize();
+    @Override
+    public void removeTransaction(final TransactionConfig transaction) {
+        removeConfiguration(txStats, transaction);
+    }
 
-				String fieldValue = null;
-				try {
-					final String[] statFieldNameSplit = element.getStatFieldName().split("\\.");
-					final PropertyUtilsBean propertyUtils = BeanUtilsBean.getInstance().getPropertyUtils();
-					Object object = stats;
-					for (final String splited : statFieldNameSplit) {
-						object = propertyUtils.getNestedProperty(object, splited);
-					}
-					fieldValue = object == null ? null : object.toString();
-
-					// fieldValue = BeanUtils.getProperty(stats,
-					// element.getStatFieldName());
-					fieldSize -= fieldValue.length();
-				} catch (final IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (final InvocationTargetException e) {
-					e.printStackTrace();
-				} catch (final NoSuchMethodException e) {
-					e.printStackTrace();
-				}
-				String state = null;
-				switch (element.getStatFieldName()) {
-				case "buyers":
-					state = getStateLine(stats.buyersState);
-					break;
-				case "sellers":
-					state = getStateLine(stats.sellersState);
-					break;
-				case "amountBought":
-					state = getStateLine(stats.boughtState);
-					break;
-				case "amountSold":
-					state = getStateLine(stats.soldState);
-					break;
-				case "lastBuyPrice":
-					state = getStateLine(stats.buyPriceState);
-					break;
-				case "lastSellPrice":
-					state = getStateLine(stats.sellPriceState);
-					break;
-				case "buyerAverage":
-					state = getStateLine(stats.buyAvgState);
-					break;
-				case "sellerAverage":
-					state = getStateLine(stats.sellAvgState);
-					break;
-				}
-				if (state != null) {
-					fieldSize -= 2;
-				}
-				while (fieldSize > 0) {
-					lineBuilder.append(' ');
-					fieldSize--;
-				}
-				String color = AnsiConstants.FOREGROUNG_GRAY;
-				switch (element.getStatFieldName()) {
-				case "buyers":
-					if (stats.buyers > stats.sellers) {
-						color = AnsiConstants.FOREGROUNG_GREEN;
-					}
-					break;
-				case "sellers":
-					if (stats.sellers > stats.buyers) {
-						color = AnsiConstants.FOREGROUNG_RED;
-					}
-					break;
-				case "amountBought":
-					if (stats.amountBought.compareTo(stats.amountSold) > 0) {
-						color = AnsiConstants.FOREGROUNG_GREEN;
-					}
-					break;
-				case "amountSold":
-					if (stats.amountSold.compareTo(stats.amountBought) > 0) {
-						color = AnsiConstants.FOREGROUNG_RED;
-					}
-					break;
-				}
-				lineBuilder.append(color);
-				lineBuilder
-				        .append(fieldSize >= 0 ? fieldValue : fieldValue.substring(0, fieldValue.length() + fieldSize));
-				if (state != null) {
-					lineBuilder.append(state);
-				}
-				lineBuilder.append(AnsiConstants.FOREGROUNG_GRAY);
-				lineBuilder.append('|');
-			}
-			lineBuilder.append(System.lineSeparator());
-		}
-		lineBuilder.append(AnsiConstants.FOREGROUNG_GRAY);
-		System.out.println(lineBuilder.toString());
-	}
-
-	private String getStateLine(final EStatisticState state) {
-		if (state != null) {
-			switch (state) {
-			case MINUS:
-				return AnsiConstants.FOREGROUNG_GRAY + " -";
-			case PLUS:
-				return AnsiConstants.FOREGROUNG_GRAY + " +";
-			case ZERO:
-				return AnsiConstants.FOREGROUNG_GRAY + "  ";
-			}
-		}
-		return "  ";
-	}
-
-	private void drawTransactionTable(final StatTableElement[] tableElements,
-	        final List<TransactionStatistics> statsArray) {
-		final StringBuilder lineBuilder = new StringBuilder();
-		// title
-		lineBuilder.append(AnsiConstants.FOREGROUNG_GRAY);
-		lineBuilder.append('|');
-		for (final StatTableElement element : tableElements) {
-			lineBuilder.append(AnsiConstants.FOREGROUNG_WHITE);
-			int fieldSize = element.getFieldSize();
-			final String fieldValue = element.getFieldTitle();
-			fieldSize -= fieldValue.length();
-			while (fieldSize > 0) {
-				lineBuilder.append(' ');
-				fieldSize--;
-			}
-			lineBuilder.append(fieldSize >= 0 ? fieldValue : fieldValue.substring(0, fieldValue.length() + fieldSize));
-			lineBuilder.append(AnsiConstants.FOREGROUNG_GRAY);
-			lineBuilder.append('|');
-		}
-		lineBuilder.append(System.lineSeparator());
-		// line
-		lineBuilder.append('+');
-		for (final StatTableElement element : tableElements) {
-			int fieldSize = element.getFieldSize();
-			while (fieldSize > 0) {
-				lineBuilder.append('-');
-				fieldSize--;
-			}
-			lineBuilder.append('+');
-		}
-		lineBuilder.append(System.lineSeparator());
-		// statistics
-		for (final TransactionStatistics stats : statsArray) {
-			lineBuilder.append(AnsiConstants.FOREGROUNG_GRAY);
-			lineBuilder.append('|');
-			for (final StatTableElement element : tableElements) {
-				int fieldSize = element.getFieldSize();
-
-				String fieldValue = null;
-				try {
-					final String[] statFieldNameSplit = element.getStatFieldName().split("\\.");
-					final PropertyUtilsBean propertyUtils = BeanUtilsBean.getInstance().getPropertyUtils();
-					Object object = stats;
-					for (final String splited : statFieldNameSplit) {
-						object = propertyUtils.getNestedProperty(object, splited);
-					}
-					fieldValue = object == null ? null : object.toString();
-
-					if (fieldValue != null) {
-						fieldSize -= fieldValue.length();
-					}
-				} catch (final IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (final InvocationTargetException e) {
-					e.printStackTrace();
-				} catch (final NoSuchMethodException e) {
-					e.printStackTrace();
-				}
-				while (fieldSize > 0) {
-					lineBuilder.append(' ');
-					fieldSize--;
-				}
-				String color = AnsiConstants.FOREGROUNG_GRAY;
-				switch (element.getStatFieldName()) {
-				case "config.targetPrice":
-					if (stats.getTargetAlarm() != null && stats.getTargetAlarm()) {
-						color = AnsiConstants.FOREGROUNG_GREEN;
-					}
-					break;
-				case "config.zeroPrice":
-					if (stats.getZeroAlarm() != null && stats.getZeroAlarm()) {
-						color = AnsiConstants.FOREGROUNG_GREEN;
-					}
-					break;
-				case "config.stopPrice":
-					if (stats.getStopAlarm() != null && stats.getStopAlarm()) {
-						color = AnsiConstants.FOREGROUNG_RED;
-					}
-					break;
-				case "moveStopPrice":
-					if (stats.getMoveStopAlarm() != null && stats.getMoveStopAlarm()) {
-						color = AnsiConstants.FOREGROUNG_RED;
-					}
-					break;
-				}
-
-				lineBuilder.append(color);
-				if (fieldValue != null) {
-					lineBuilder.append(
-					        fieldSize >= 0 ? fieldValue : fieldValue.substring(0, fieldValue.length() + fieldSize));
-				}
-				lineBuilder.append(AnsiConstants.FOREGROUNG_GRAY);
-				lineBuilder.append('|');
-			}
-			lineBuilder.append(System.lineSeparator());
-		}
-		lineBuilder.append(AnsiConstants.FOREGROUNG_GRAY);
-		System.out.println(lineBuilder.toString());
-	}
-
-	@Override
-	public void updateStatistic(final WatcherStatistics statistic) {
-		addConfiguration(watcherStats, statistic);
-		if (!lockDraw) {
-			updateStatistics();
-		}
-	}
-
-	@Override
-	public void updateStatistic(final TransactionStatistics statistic) {
-		addConfiguration(txStats, statistic);
-		if (!lockDraw) {
-			updateStatistics();
-		}
-	}
-
-	private <T extends IStatistics> void addConfiguration(final List<T> list, final T stats) {
-		if (stats == null) {
-			return;
-		}
-		for (int i = 0; i < list.size(); i++) {
-			if (list.get(i).getConfigurationId() == stats.getConfigurationId()) {
-				list.set(i, stats);
-				return;
-			}
-		}
-		list.add(stats);
-	}
-
-	private <T extends IStatistics> void removeConfiguration(final List<T> list, final BaseConfig config) {
-		if (config == null) {
-			return;
-		}
-		list.stream() //
-		        .filter(stat -> Objects.equals(stat.getConfigurationId(), config.getId())) //
-		        .findFirst().ifPresent(stat -> list.remove(stat));
-		;
-	}
-
-	@Override
-	public void removeTransaction(final TransactionConfig transaction) {
-		removeConfiguration(txStats, transaction);
-	}
-
-	@Override
-	public void removeWatcher(final WatcherConfig watcher) {
-		removeConfiguration(watcherStats, watcher);
-	}
+    @Override
+    public void removeWatcher(final WatcherConfig watcher) {
+        removeConfiguration(watcherStats, watcher);
+    }
 
 }
