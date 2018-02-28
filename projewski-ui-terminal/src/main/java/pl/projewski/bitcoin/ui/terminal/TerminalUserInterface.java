@@ -89,7 +89,8 @@ public class TerminalUserInterface implements IUserInterface {
                                 }
                                 // TODO: Default for exchange and get from command line a baseCoin
                                 WatcherConfig config = storeManager
-                                        .findWatcher(BaseConfig.getConfigSymbol(exchange.getName(), coin, "PLN"));
+                                        .findWatcher(BaseConfig
+                                                .getConfigSymbol(exchange.getName(), coin, exchange.getBaseCoin()));
                                 if (config == null) {
                                     // add new
                                     config = new WatcherConfig();
@@ -110,13 +111,15 @@ public class TerminalUserInterface implements IUserInterface {
                             }
                             case "buy": {
                                 final TransactionConfig txConfig = new TransactionConfig();
-                                txConfig.setBaseCoin("PLN");
+                                txConfig.setBaseCoin(exchange.getBaseCoin());
                                 txConfig.setExchangeName(exchange.getName());
                                 System.out.print("Coin symbol: ");
                                 txConfig.setCryptoCoin(scanner.nextLine().toUpperCase());
                                 // buy
-                                txConfig.setInvest(readBigDecimal(scanner, "Buy invest [PLN]"));
-                                txConfig.setBuyPrice(readBigDecimal(scanner, "Buy price [PLN]"));
+                                txConfig.setInvest(
+                                        readBigDecimal(scanner, "Buy invest [" + exchange.getBaseCoin() + "]"));
+                                txConfig.setBuyPrice(
+                                        readBigDecimal(scanner, "Buy price [" + exchange.getBaseCoin() + "]"));
                                 // zero price (stop zero)
                                 txConfig.setZeroPrice(
                                         Calculator.zeroPrice(txConfig.getBuyPrice(), exchange.getTransactionFee()));
