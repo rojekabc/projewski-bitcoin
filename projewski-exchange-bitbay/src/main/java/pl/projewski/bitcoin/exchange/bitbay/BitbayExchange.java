@@ -2,6 +2,8 @@ package pl.projewski.bitcoin.exchange.bitbay;
 
 import lombok.Getter;
 import lombok.Setter;
+import pl.projewski.bitcoin.common.configuration.ConfigurationManager;
+import pl.projewski.bitcoin.common.configuration.ModuleConfiguration;
 import pl.projewski.bitcoin.exchange.api.*;
 import pl.projewski.bitcoin.exchange.bitbay.api.v2.BitBayEndpoint;
 import pl.projewski.bitcoin.exchange.bitbay.api.v2.Ticker;
@@ -12,7 +14,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class BitbayExchange implements IExchange {
-    private final static BigDecimal FEE = new BigDecimal("0.44");
     private static final String BITCOIN_SYMBOL = "BTC";
     private static final String[] CRYPTO_COINS = new String[]{ //
             BITCOIN_SYMBOL, "ETH", "LSK", "LTC", "GAME", "DASH", "BCC", "BTG" //
@@ -23,10 +24,12 @@ public class BitbayExchange implements IExchange {
 
     private final BitBayEndpoint bitbay = new BitBayEndpoint();
 
+    public final static ModuleConfiguration configuration = ConfigurationManager
+            .getInstance("projewski-exchange-bitbay");
+
     @Getter
     @Setter
-    private String baseCoin = "PLN";
-
+    private String baseCoin = configuration.getString("base-coin", "PLN");
 
     @Override
     public List<Market> getMarketList() {
@@ -83,12 +86,22 @@ public class BitbayExchange implements IExchange {
 
     @Override
     public BigDecimal getTransactionFee() {
-        return FEE;
+        return new BigDecimal(configuration.getString("fee", "0.44"));
     }
 
     @Override
     public String getName() {
         return "BitBay";
+    }
+
+    @Override
+    public int getTradeQueryLimit() {
+        return configuration.getInt("trade-query-limit", 100);
+    }
+
+    @Override
+    public int getOrderQueryLimit() {
+        return configuration.getInt("order-query-limit", 100);
     }
 
 }

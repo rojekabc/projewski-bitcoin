@@ -65,4 +65,18 @@ public interface IExchange {
      */
     void setBaseCoin(String baseCoin);
 
+    /**
+     * limit of trade query to endpoint
+     *
+     * @return
+     */
+    int getTradeQueryLimit();
+
+    /**
+     * limit of order query to endpoint
+     *
+     * @return
+     */
+    int getOrderQueryLimit();
+
 }

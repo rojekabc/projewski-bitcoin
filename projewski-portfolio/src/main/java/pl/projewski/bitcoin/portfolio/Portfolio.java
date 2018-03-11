@@ -1,6 +1,7 @@
 package pl.projewski.bitcoin.portfolio;
 
 import pl.projewski.bitcoin.commander.Commander;
+import pl.projewski.bitcoin.common.configuration.ConfigurationManager;
 import pl.projewski.bitcoin.exchange.manager.ExchangeManager;
 import pl.projewski.bitcoin.store.api.IStoreManager;
 import pl.projewski.bitcoin.store.api.data.TransactionConfig;
@@ -26,7 +27,7 @@ public class Portfolio {
     }
 
     public static void main(final String[] args) {
-        final int updateSeconds = 30;
+        final int updateSeconds = ConfigurationManager.getInstance("projewski-portfolio").getInt("update-seconds", 30);
         final Commander commander = Commander.getInstance();
         final IUserInterface userInterface = commander.getUserInterface();
         final IStatisticsDrawer statisticsDrawer = userInterface.getStatisticDrawer();

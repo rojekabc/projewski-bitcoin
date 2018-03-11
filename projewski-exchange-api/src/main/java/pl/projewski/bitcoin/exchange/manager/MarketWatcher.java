@@ -81,8 +81,8 @@ class MarketWatcher implements Runnable {
             final WatcherConfig config = coinWatch.getConfig();
             try {
                 final IExchange exchange = coinWatch.getExchange();
-                // TODO: configure query limit
-                final List<Trade> trades = exchange.getTradeList(config.getMarketSymbol(), 100);
+                final List<Trade> trades = exchange
+                        .getTradeList(config.getMarketSymbol(), exchange.getTradeQueryLimit());
                 final LinkedList<Trade> tradeSet = coinWatch.getTrades();
                 boolean hasChange = false;
                 for (final Trade trade : trades) {
@@ -98,7 +98,8 @@ class MarketWatcher implements Runnable {
                         // System.out.println(trade);
                     }
                 }
-                final OrderBook orderBook = exchange.getOrderBook(config.getMarketSymbol(), 100);
+                final OrderBook orderBook = exchange
+                        .getOrderBook(config.getMarketSymbol(), exchange.getOrderQueryLimit());
 
                 coinWatch.setAskOrders(orderBook.getAskOrders());
                 coinWatch.setBidOrders(orderBook.getBidOrders());

@@ -2,6 +2,8 @@ package pl.projewski.bitcoin.exchange.binance;
 
 import lombok.Getter;
 import lombok.Setter;
+import pl.projewski.bitcoin.common.configuration.ConfigurationManager;
+import pl.projewski.bitcoin.common.configuration.ModuleConfiguration;
 import pl.projewski.bitcoin.exchange.api.*;
 import pl.projewski.bitcoin.exchange.binance.api.v1.BinanceEndpoint;
 import pl.projewski.bitcoin.exchange.binance.api.v1.ExchangeInfo;
@@ -13,9 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BinanceExchange implements IExchange {
+    public final static ModuleConfiguration configuration = ConfigurationManager
+            .getInstance("projewski-exchange-binance");
     @Getter
     @Setter
-    private String baseCoin = "BTC";
+    private String baseCoin = configuration.getString("base-coin", "BTC");
 
     BinanceEndpoint binance = new BinanceEndpoint();
 
@@ -72,12 +76,22 @@ public class BinanceExchange implements IExchange {
     @Override
     public BigDecimal getTransactionFee() {
         // TODO
-        return BigDecimal.ZERO;
+        return new BigDecimal(configuration.getString("fee", "0"));
     }
 
     @Override
     public String getName() {
         return "Binance";
+    }
+
+    @Override
+    public int getTradeQueryLimit() {
+        return configuration.getInt("trade-query-limit", 100);
+    }
+
+    @Override
+    public int getOrderQueryLimit() {
+        return configuration.getInt("order-query-limit", 100);
     }
 
 }
