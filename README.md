@@ -4,14 +4,19 @@ This project is the set of Java Libraries and Appications, which are helpfull in
 
 ## Features
 * Watch the BitBay exchange
+* Watch the Binance exchange
 * Manage a coin market watcher
 * Manage the coin transaction list
 * Terminal user interface
+  * market watch management
+  * transaction watch management
+  * exchange switch
 * Update information from coin markets
 * Store and load configuration of watchers and transactions
 * Assign to transaction "stop win", "stop loose" and "stop moving loose"
 * Observe market changes through whole stored data and between last read information from market
 * Bet on crypto-games service
+* [Configuration](https://github.com/rojekabc/projewski-bitcoin/wiki/Configuration-properties) in one file of all modules
 
 ## Getting started
 To run the application
@@ -43,4 +48,4 @@ bash src/scripts/run-portfolio.sh
 ```
 
 ## Planned features / roadmap
-Currenlty planned version is 0.0.2. Look to the [issue page](https://github.com/rojekabc/projewski-bitcoin/milestone/3) to see, what is planned for the current milestone.
+Currenlty planned version is 0.0.3. Look to the [issue page](https://github.com/rojekabc/projewski-bitcoin/milestone/4) to see, what is planned for the current milestone.

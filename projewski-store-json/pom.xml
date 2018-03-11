@@ -3,7 +3,7 @@
   <parent>
     <groupId>pl.projewski.bitcoin</groupId>
     <artifactId>projewski-bitcoin</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.2</version>
   </parent>
   <artifactId>projewski-store-json</artifactId>
   <name>Store configuration in JSON file</name>
@@ -11,7 +11,7 @@
   	<dependency>
   		<groupId>pl.projewski.bitcoin</groupId>
   		<artifactId>projewski-store-api</artifactId>
-  		<version>0.0.2-SNAPSHOT</version>
+  		<version>0.0.2</version>
   	</dependency>
   	<dependency>
   		<groupId>com.google.code.gson</groupId>
