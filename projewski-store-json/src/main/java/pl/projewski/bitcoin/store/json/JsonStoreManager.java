@@ -20,9 +20,9 @@ public class JsonStoreManager implements IStoreManager {
     private StoreContainer container = new StoreContainer();
     private final static String filename = "pbsc.json";
 
-    private static final Comparator<TransactionConfig> TRANSACTION_SORTER = new Comparator<TransactionConfig>() {
+    private static final Comparator<BaseConfig> TRANSACTION_SORTER = new Comparator<BaseConfig>() {
         @Override
-        public int compare(final TransactionConfig tx1, final TransactionConfig tx2) {
+        public int compare(final BaseConfig tx1, final BaseConfig tx2) {
             return Integer.compare(tx1.getId(), tx2.getId());
         }
     };
@@ -91,6 +91,8 @@ public class JsonStoreManager implements IStoreManager {
         if (file.exists()) {
             try (FileReader reader = new FileReader(file)) {
                 container = gson.fromJson(reader, StoreContainer.class);
+                container.getWatchList().sort(TRANSACTION_SORTER);
+                container.getTransactionList().sort(TRANSACTION_SORTER);
             } catch (final IOException e) {
                 throw new StoreException(e);
             }
