@@ -4,7 +4,7 @@
     <parent>
         <groupId>pl.projewski.bitcoin</groupId>
         <artifactId>projewski-bitcoin</artifactId>
-        <version>0.0.2</version>
+        <version>0.0.3-SNAPSHOT</version>
     </parent>
     <artifactId>projewski-exchange-binance</artifactId>
     <name>Binance Exchange</name>
@@ -12,7 +12,7 @@
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-exchange-api</artifactId>
-            <version>0.0.2</version>
+            <version>0.0.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

@@ -3,7 +3,7 @@
   <parent>
     <groupId>pl.projewski.bitcoin</groupId>
     <artifactId>projewski-bitcoin</artifactId>
-    <version>0.0.2</version>
+      <version>0.0.3-SNAPSHOT</version>
   </parent>
   <artifactId>projewski-commander</artifactId>
   <name>Main management point</name>
@@ -11,17 +11,17 @@
   	<dependency>
   		<groupId>pl.projewski.bitcoin</groupId>
   		<artifactId>projewski-store-api</artifactId>
-  		<version>0.0.2</version>
+        <version>0.0.3-SNAPSHOT</version>
   	</dependency>
   	<dependency>
   		<groupId>pl.projewski.bitcoin</groupId>
   		<artifactId>projewski-exchange-api</artifactId>
-  		<version>0.0.2</version>
+        <version>0.0.3-SNAPSHOT</version>
   	</dependency>
   	<dependency>
   		<groupId>pl.projewski.bitcoin</groupId>
   		<artifactId>projewski-ui-api</artifactId>
-  		<version>0.0.2</version>
+        <version>0.0.3-SNAPSHOT</version>
   	</dependency>
   </dependencies>
 </project>
