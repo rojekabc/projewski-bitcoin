@@ -7,7 +7,7 @@
     <packaging>pom</packaging>
     <name>BitCoin Project</name>
     <modules>
-        <module>projewski-cointmarket</module>
+        <module>projewski-coinmarket</module>
         <module>projewski-eoboz</module>
         <module>projewski-portfolio</module>
         <module>projewski-exchange-bitbay</module>
@@ -22,6 +22,9 @@
         <module>projewski-exchange-binance</module>
         <module>projewski-explorer-manager</module>
         <module>projewski-explorer-api</module>
+        <module>projewski-exchange-manager</module>
+        <module>projewski-explorer-neoscan</module>
+        <module>projewski-explorer-sample</module>
     </modules>
 
     <dependencies>

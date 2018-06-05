@@ -84,12 +84,8 @@ class MarketWatcher implements Runnable {
                 final List<Trade> trades = exchange
                         .getTradeList(config.getMarketSymbol(), exchange.getTradeQueryLimit());
                 final LinkedList<Trade> tradeSet = coinWatch.getTrades();
-                boolean hasChange = false;
                 for (final Trade trade : trades) {
-                    if (tradeSet.contains(trade)) {
-                        continue; // no more new elements
-                    } else {
-                        hasChange = true;
+                    if (!tradeSet.contains(trade)) {
                         if (tradeSet.size() >= config.getAmountTradeInStatistic()) {
                             tradeSet.removeLast();
                         }

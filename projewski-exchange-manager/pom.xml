@@ -6,15 +6,16 @@
         <artifactId>projewski-bitcoin</artifactId>
         <groupId>pl.projewski.bitcoin</groupId>
         <version>0.0.3-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>projewski-explorer-manager</artifactId>
+    <artifactId>projewski-exchange-manager</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
-            <artifactId>projewski-explorer-api</artifactId>
+            <artifactId>projewski-exchange-api</artifactId>
             <version>0.0.3-SNAPSHOT</version>
         </dependency>
     </dependencies>

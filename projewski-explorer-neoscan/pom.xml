@@ -9,12 +9,16 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>projewski-explorer-manager</artifactId>
-
+    <artifactId>projewski-explorer-neoscan</artifactId>
     <dependencies>
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-explorer-api</artifactId>
+            <version>0.0.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>pl.projewski.bitcoin</groupId>
+            <artifactId>projewski-common</artifactId>
             <version>0.0.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
