@@ -1,5 +1,10 @@
 package pl.projewski.bitcoin.exchange.binance.api.v1;
 
-public class ExchangeFilter {
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
+@Data
+@AllArgsConstructor
+public class ExchangeFilter {
+    private ExchangeFilterType filterType;
 }
