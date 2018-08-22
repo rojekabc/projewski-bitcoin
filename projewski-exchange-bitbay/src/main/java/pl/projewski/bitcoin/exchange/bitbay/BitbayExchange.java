@@ -21,6 +21,8 @@ public class BitbayExchange implements IExchange {
     private static final String[] FIAT_COINS = new String[]{ //
             "PLN", "USD", "EUR" //
     };
+    // limitation is done in reason of some overestimated bids/asks on the list, which produce less trusted result
+    private static final int LIMIT_NUMBER_OF_ORDERS = 50;
 
     private final BitBayEndpoint bitbay = new BitBayEndpoint();
 
@@ -71,14 +73,13 @@ public class BitbayExchange implements IExchange {
     @Override
     public OrderBook getOrderBook(final String symbol, final int limit) {
         final OrderBook result = new OrderBook();
-        Order o;
         final pl.projewski.bitcoin.exchange.bitbay.api.v2.OrderBook bitbayOrderBook = bitbay.getOrderBook(symbol);
         final List<Order> asks = new ArrayList<>();
-        bitbayOrderBook.getAsks()
+        bitbayOrderBook.getAsks().subList(0, LIMIT_NUMBER_OF_ORDERS)
                 .forEach(bitBayOrder -> asks.add(new Order(bitBayOrder.getPrice(), bitBayOrder.getQuantity())));
         result.setAskOrders(asks);
         final List<Order> bids = new ArrayList<>();
-        bitbayOrderBook.getBids()
+        bitbayOrderBook.getBids().subList(0, LIMIT_NUMBER_OF_ORDERS)
                 .forEach(bitBayOrder -> bids.add(new Order(bitBayOrder.getPrice(), bitBayOrder.getQuantity())));
         result.setBidOrders(bids);
         return result;

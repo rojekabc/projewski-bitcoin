@@ -47,7 +47,7 @@ class MarketWatcher implements Runnable {
         BigDecimal buyQuantity = BigDecimal.ZERO;
         BigDecimal buyAvgPrice = BigDecimal.ZERO;
         for (final Order order : askOrders) {
-            if (buyBestPrice.compareTo(order.getPrice()) < 0) {
+            if (buyBestPrice.compareTo(order.getPrice()) > 0) {
                 buyBestPrice = order.getPrice();
             }
             buyQuantity = buyQuantity.add(order.getQuantity());
