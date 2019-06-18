@@ -25,8 +25,6 @@ public class CryptoGamesEndpoint {
 
     public UserBalaneResponse balance(final String coin, final String userApiKey) {
         final Gson gson = new Gson();
-        System.out.println("Coin " + coin);
-        System.out.println("Key " + userApiKey);
         try (final InputStream inputStream = HttpClientsManager.getContent(CRYPTOGAMES_BASE_URI,
                 "balance/" + coin + "/" + userApiKey)) {
             return gson.fromJson(new InputStreamReader(inputStream), UserBalaneResponse.class);

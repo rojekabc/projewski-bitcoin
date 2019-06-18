@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.function.Function;
 
 public class Gambler {
     public static final String propertiesFielname = "gambler.properties";
@@ -69,71 +70,101 @@ public class Gambler {
         return result;
     }
 
-    public static void main(final String[] args) {
-        final GamblerConfiguration conf = loadConfiguration();
-        final Scanner scanner = new Scanner(System.in);
-        final CryptoGamesEndpoint endpoint = new CryptoGamesEndpoint();
-        UserBalaneResponse userBalaneResponse = endpoint.balance(conf.getBetCoin(), conf.getPersonalApiKey());
-        BigDecimal balance = userBalaneResponse.getBalance();
-        boolean answer = false;
-        String nextLine;
-        BigDecimal account = new BigDecimal("0");
+    public static <T> T readFromUser(final Runnable message,
+            final Function<String, Boolean> lineReader, final Function<String, T> producer) {
+        final boolean answer = false;
         while (!answer) {
-            System.out.println("Your current account balance is: " + balance);
-            System.out.print("How much would you like to spend? ");
-            nextLine = scanner.nextLine().toLowerCase();
-            account = new BigDecimal(nextLine);
-            if (account.compareTo(balance) <= 0) {
-                answer = true;
-            } else {
-                System.out.println("Value not possible");
+            message.run();
+            final String nextLine = scanner.nextLine().toLowerCase();
+            if (lineReader.apply(nextLine)) {
+                return producer.apply(nextLine);
             }
         }
+    }
+
+    public static BigDecimal getUserBalance() {
+        final UserBalaneResponse userBalaneResponse =
+                endpoint.balance(configuration.getBetCoin(), configuration.getPersonalApiKey());
+        return userBalaneResponse.getBalance();
+    }
+
+    private static Scanner scanner;
+    private static GamblerConfiguration configuration;
+    private static CryptoGamesEndpoint endpoint;
+
+    private static void init() {
+        configuration = loadConfiguration();
+        scanner = new Scanner(System.in);
+        endpoint = new CryptoGamesEndpoint();
+    }
+
+    private static BigDecimal readUserBetAccount() {
+        final BigDecimal userBalance = getUserBalance();
+        return readFromUser( //
+                () -> {
+                    System.out.println("Your current account balance is: " + userBalance);
+                    System.out.print("How much would you like to spend? ");
+
+                }, //
+                (line) -> {
+                    final BigDecimal value = new BigDecimal(line);
+                    return value.compareTo(userBalance) <= 0;
+                }, //
+                BigDecimal::new);
+    }
+
+    private static BigDecimal readUserTarget() {
+        final BigDecimal configurationTarget = configuration.getTargetValue();
+        return readFromUser( //
+                () -> System.out.print("Get your target [" + configurationTarget.toString() + "]: "), //
+                (line) -> true, //
+                (line) -> StringUtils.isEmpty(line) ? configurationTarget : new BigDecimal(line)
+        );
+    }
+
+    private static String readUserAnswer(final BigDecimal bet) {
+        return readFromUser( //
+                () -> System.out.print("Should I bet " + bet + " ? {[y]es / [n]o / [q]uit} "),
+                (line) -> line.matches("[ynq]"),
+                (line) -> line
+        );
+    }
+
+    public static void main(final String[] args) {
+        init();
+
+        // set bet account
+        BigDecimal account = readUserBetAccount();
         final BigDecimal startAccount = account;
 
-        BigDecimal target = conf.getTargetValue();
-        answer = false;
-        while (!answer) {
-            System.out.print("Get your target [" + target.toString() + "]: ");
-            nextLine = scanner.nextLine().toLowerCase();
-            if (StringUtils.isEmpty(nextLine)) {
-                break;
-            }
-            target = new BigDecimal(nextLine);
-        }
+        // set bet target
+        final BigDecimal target = readUserTarget();
 
-        BigDecimal bet = conf.getBaseSetPoint();
+        BigDecimal bet = configuration.getBaseSetPoint();
         boolean lastWin = false;
         int looseStep = 0;
         System.out.print("[" + account.toString() + "] Bet: " + bet + " ... ");
         while (account.compareTo(BigDecimal.ZERO) > 0) {
-            if (bet.compareTo(conf.getAskPoint()) >= 0) {
-                answer = false;
-                while (!answer) {
-                    System.out.print("Should I bet " + bet + " ? {[y]es / [n]o / [r]eset / [q]uit} ");
-                    nextLine = scanner.nextLine().toLowerCase();
-                    switch (nextLine) {
-                    case "r":
-                        account = new BigDecimal("0.0");
-                    case "n":
-                        looseStep = 0;
-                        bet = conf.getBaseSetPoint();
-                    case "y":
-                        answer = true;
-                        break;
-                    case "q":
-                        answer = true;
-                        scanner.close();
-                        System.exit(0);
-                        break;
-                    }
+            if (bet.compareTo(configuration.getAskPoint()) >= 0) {
+                final String answer = readUserAnswer(bet);
+                switch (answer) {
+                case "n":
+                    looseStep = 0;
+                    bet = configuration.getBaseSetPoint();
+                case "y":
+                    break;
+                case "q":
+                    scanner.close();
+                    System.exit(0);
+                    break;
                 }
                 System.out.print("[" + account.toString() + "] Bet: " + bet + " ... ");
             }
             // send the bet
             final PlaceBetResponse response;
             try {
-                response = endpoint.placebet(conf.getBetCoin(), conf.getPersonalApiKey(), createBetRequest(bet));
+                response = endpoint.placebet(configuration.getBetCoin(), configuration.getPersonalApiKey(),
+                        createBetRequest(bet));
             } catch (final HttpResponseStatusException e) {
                 System.out.println("Http status: " + e.getStatusCode());
                 // retry
@@ -155,29 +186,29 @@ public class Gambler {
                 // win
                 looseStep = 0;
                 if (lastWin) {
-                    if (bet.compareTo(conf.getMaxPositivePoint()) < 0) {
-                        bet = bet.add(conf.getBaseSetPoint());
+                    if (bet.compareTo(configuration.getMaxPositivePoint()) < 0) {
+                        bet = bet.add(configuration.getBaseSetPoint());
                     }
                 } else {
-                    bet = conf.getBaseSetPoint();
+                    bet = configuration.getBaseSetPoint();
                 }
             } else {
-                switch (conf.getLooseTechnique()) {
+                switch (configuration.getLooseTechnique()) {
                 case DOUBLE:
                     bet.add(bet);
                     break;
                 case ZERO2N1:
                     // lose
                     if (looseStep == 0) {
-                        bet = bet.add(conf.getBaseSetPoint());
+                        bet = bet.add(configuration.getBaseSetPoint());
                     } else if (looseStep == 1) {
-                        bet = bet.add(bet).subtract(conf.getBaseSetPoint());
+                        bet = bet.add(bet).subtract(configuration.getBaseSetPoint());
                     } else {
-                        bet = bet.add(bet).add(conf.getBaseSetPoint());
+                        bet = bet.add(bet).add(configuration.getBaseSetPoint());
                     }
                     break;
                 case ALL2N1:
-                    bet = bet.add(bet).add(conf.getBaseSetPoint());
+                    bet = bet.add(bet).add(configuration.getBaseSetPoint());
                     break;
                 }
                 looseStep++;
@@ -190,9 +221,7 @@ public class Gambler {
             }
             System.out.print("[" + account.toString() + "] Bet: " + bet + " ... ");
         }
-        userBalaneResponse = endpoint.balance(conf.getBetCoin(), conf.getPersonalApiKey());
-        balance = userBalaneResponse.getBalance();
-        System.out.println("Your current account balance is: " + balance);
+        System.out.println("Your current account balance is: " + getUserBalance());
     }
 
 }
