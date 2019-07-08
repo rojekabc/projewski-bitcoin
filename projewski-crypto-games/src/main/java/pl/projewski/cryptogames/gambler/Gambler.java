@@ -210,6 +210,9 @@ public class Gambler {
                 case ALL2N1:
                     bet = bet.add(bet).add(configuration.getBaseSetPoint());
                     break;
+                case BASE:
+                    bet = configuration.getBaseSetPoint();
+                    break;
                 }
                 looseStep++;
             }
