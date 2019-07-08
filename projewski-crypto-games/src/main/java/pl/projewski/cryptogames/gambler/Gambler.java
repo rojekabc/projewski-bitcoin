@@ -102,7 +102,8 @@ public class Gambler {
         final BigDecimal userBalance = getUserBalance();
         return readFromUser( //
                 () -> {
-                    System.out.println("Your current account balance is: " + userBalance);
+                    System.out.println(
+                            "Your current account balance is: " + userBalance + " " + configuration.getBetCoin());
                     System.out.print("How much would you like to spend? ");
 
                 }, //
@@ -133,6 +134,7 @@ public class Gambler {
     public static void main(final String[] args) {
         init();
 
+        final GamblerStatistics stats = new GamblerStatistics();
         // set bet account
         BigDecimal account = readUserBetAccount();
         final BigDecimal startAccount = account;
@@ -143,7 +145,7 @@ public class Gambler {
         BigDecimal bet = configuration.getBaseSetPoint();
         boolean lastWin = false;
         int looseStep = 0;
-        System.out.print("[" + account.toString() + "] Bet: " + bet + " ... ");
+        System.out.print("[" + account.toString() + "] [" + stats.getWinRatio() + "] Bet: " + bet + " ... ");
         while (account.compareTo(BigDecimal.ZERO) > 0) {
             if (bet.compareTo(configuration.getAskPoint()) >= 0) {
                 final String answer = readUserAnswer(bet);
@@ -158,7 +160,7 @@ public class Gambler {
                     System.exit(0);
                     break;
                 }
-                System.out.print("[" + account.toString() + "] Bet: " + bet + " ... ");
+                System.out.print("[" + account.toString() + "] [" + stats.getWinRatio() + "] Bet: " + bet + " ... ");
             }
             // send the bet
             final PlaceBetResponse response;
@@ -174,6 +176,7 @@ public class Gambler {
             // print the result
             final BigDecimal profit = response.getProfit();
             final boolean curWin = profit.compareTo(new BigDecimal("0")) > 0;
+            stats.addResult(curWin);
             account = account.add(profit);
             System.out.println("You " + (curWin ? "win" : "loose"));
             // check it's a target
@@ -195,7 +198,7 @@ public class Gambler {
             } else {
                 switch (configuration.getLooseTechnique()) {
                 case DOUBLE:
-                    bet.add(bet);
+                    bet = bet.add(bet);
                     break;
                 case ZERO2N1:
                     // lose
@@ -222,9 +225,14 @@ public class Gambler {
                 System.out.println("You cannot bet " + bet + "! You loose!");
                 break;
             }
-            System.out.print("[" + account.toString() + "] Bet: " + bet + " ... ");
+            System.out.print("[" + account.toString() + "] [" + stats.getWinRatio() + "] Bet: " + bet + " ... ");
         }
         System.out.println("Your current account balance is: " + getUserBalance());
+        System.out.println("The amount of bets: " + stats.getRatio());
+        System.out.println("The win ratio is: " + stats.getWinRatio());
+        System.out.println("Longest win series: " + stats.getLongestWin());
+        System.out.println("Longest loose series: " + stats.getLongestLoose());
+
     }
 
 }
