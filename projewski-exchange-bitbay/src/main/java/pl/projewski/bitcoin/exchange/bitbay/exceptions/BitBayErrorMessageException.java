@@ -1,13 +1,20 @@
 package pl.projewski.bitcoin.exchange.bitbay.exceptions;
 
-import pl.projewski.bitcoin.exchange.bitbay.api.v2.ErrorMessage;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import pl.projewski.bitcoin.exchange.bitbay.api.rest.model.Error;
 
+import java.util.List;
+
+@RequiredArgsConstructor
 public class BitBayErrorMessageException extends BitBayException {
 
 	private static final long serialVersionUID = 1062622868659433331L;
+	private final List<Error> errors;
 
-	public BitBayErrorMessageException(final ErrorMessage error) {
-		super("BitBay error. Code=" + error.getCode() + " message=" + error.getMessage());
+	public String getMessage() {
+		return "Zonda failure codes: " + StringUtils.join(errors);
 	}
+
 
 }

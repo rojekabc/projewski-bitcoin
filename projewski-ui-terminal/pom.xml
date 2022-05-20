@@ -16,17 +16,14 @@
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
-            <version>1.9.3</version>
         </dependency>
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-ui-api</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-commander</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

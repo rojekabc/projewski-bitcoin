@@ -12,42 +12,35 @@
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-exchange-bitbay</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-exchange-binance</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-store-json</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-ui-terminal</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
             <scope>runtime</scope>
         </dependency>
         <!-- compile scope -->
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-ui-api</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-exchange-api</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-commander</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>

@@ -14,10 +14,11 @@ public interface IExchange {
     /**
      * Get last market price.
      *
-     * @param symbol
+     * @param firstSymbol
+     * @param secondSymbol
      * @return
      */
-    BigDecimal getMarketPrice(String symbol);
+    BigDecimal getMarketPrice(String firstSymbol, String secondSymbol);
 
     /**
      * Get a market last trades.

@@ -12,7 +12,6 @@
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-common</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -21,7 +20,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.7</version>
         </dependency>
     </dependencies>
     <build>

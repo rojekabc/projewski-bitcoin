@@ -4,11 +4,16 @@ import lombok.Getter;
 import lombok.Setter;
 import pl.projewski.bitcoin.common.configuration.ConfigurationManager;
 import pl.projewski.bitcoin.common.configuration.ModuleConfiguration;
-import pl.projewski.bitcoin.exchange.api.*;
-import pl.projewski.bitcoin.exchange.bitbay.api.v2.BitBayEndpoint;
-import pl.projewski.bitcoin.exchange.bitbay.api.v2.Ticker;
+import pl.projewski.bitcoin.exchange.api.IExchange;
+import pl.projewski.bitcoin.exchange.api.Market;
+import pl.projewski.bitcoin.exchange.api.OrderBook;
+import pl.projewski.bitcoin.exchange.api.Trade;
+import pl.projewski.bitcoin.exchange.bitbay.api.rest.BitBayEndpoint;
+import pl.projewski.bitcoin.exchange.bitbay.api.rest.model.Ticker;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -51,38 +56,19 @@ public class BitbayExchange implements IExchange {
     }
 
     @Override
-    public BigDecimal getMarketPrice(final String symbol) {
-        final Ticker ticker = bitbay.getTicker(symbol);
-        return new BigDecimal(ticker.getLast());
+    public BigDecimal getMarketPrice(final String firstCoinSymbol, final String secondCoinSymbol) {
+        final Ticker ticker = bitbay.getTicker(firstCoinSymbol, secondCoinSymbol);
+        return ticker.getRate();
     }
 
     @Override
     public List<Trade> getTradeList(final String symbol, final int limit) {
-        final List<pl.projewski.bitcoin.exchange.bitbay.api.v2.Trade> btrades = bitbay.getTrades(symbol);
-        final List<Trade> result = new ArrayList<>();
-        for (final pl.projewski.bitcoin.exchange.bitbay.api.v2.Trade btrade : btrades) {
-            final Trade trade = new Trade();
-            trade.setId(Long.valueOf(btrade.getTid()));
-            trade.setPrice(new BigDecimal(btrade.getPrice()));
-            trade.setQuantity(new BigDecimal(btrade.getAmount()));
-            result.add(trade);
-        }
-        return result;
+        return bitbay.getTrades(symbol, limit, null, null);
     }
 
     @Override
     public OrderBook getOrderBook(final String symbol, final int limit) {
-        final OrderBook result = new OrderBook();
-        final pl.projewski.bitcoin.exchange.bitbay.api.v2.OrderBook bitbayOrderBook = bitbay.getOrderBook(symbol);
-        final List<Order> asks = new ArrayList<>();
-        bitbayOrderBook.getAsks().subList(0, LIMIT_NUMBER_OF_ORDERS)
-                .forEach(bitBayOrder -> asks.add(new Order(bitBayOrder.getPrice(), bitBayOrder.getQuantity())));
-        result.setAskOrders(asks);
-        final List<Order> bids = new ArrayList<>();
-        bitbayOrderBook.getBids().subList(0, LIMIT_NUMBER_OF_ORDERS)
-                .forEach(bitBayOrder -> bids.add(new Order(bitBayOrder.getPrice(), bitBayOrder.getQuantity())));
-        result.setBidOrders(bids);
-        return result;
+        return bitbay.getOrderBook(symbol);
     }
 
     @Override
@@ -103,6 +89,16 @@ public class BitbayExchange implements IExchange {
     @Override
     public int getOrderQueryLimit() {
         return configuration.getInt("order-query-limit", 100);
+    }
+
+    public static void main(String[] args) {
+        final LocalDateTime from = LocalDateTime.of(2014, 1, 1, 0, 0, 0);
+        System.out.println(from);
+        System.out.println(from.toInstant(ZoneOffset.UTC).toEpochMilli());
+
+        final LocalDateTime to = LocalDateTime.of(2020, 12, 21, 0, 0, 0);
+        System.out.println(to);
+        System.out.println(to.toInstant(ZoneOffset.UTC).toEpochMilli());
     }
 
 }

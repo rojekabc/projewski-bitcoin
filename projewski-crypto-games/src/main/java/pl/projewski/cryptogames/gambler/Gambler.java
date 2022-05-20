@@ -20,12 +20,12 @@ import java.util.function.Function;
 public class Gambler {
     public static final String propertiesFielname = "gambler.properties";
 
-    public static PlaceBetRequest createBetRequest(final BigDecimal bet) {
+    public static PlaceBetRequest createBetRequest(final BigDecimal bet, boolean underOverFlag) {
         final PlaceBetRequest request = new PlaceBetRequest();
         request.setBet(bet);
         request.setClientSeed(RandomStringUtils.randomAlphanumeric(40));
         request.setPayout(new BigDecimal("2.0"));
-        request.setUnderOver(true);
+        request.setUnderOver(underOverFlag);
         return request;
     }
 
@@ -71,7 +71,7 @@ public class Gambler {
     }
 
     public static <T> T readFromUser(final Runnable message,
-            final Function<String, Boolean> lineReader, final Function<String, T> producer) {
+                                     final Function<String, Boolean> lineReader, final Function<String, T> producer) {
         final boolean answer = false;
         while (!answer) {
             message.run();
@@ -102,6 +102,7 @@ public class Gambler {
         final BigDecimal userBalance = getUserBalance();
         return readFromUser( //
                 () -> {
+                    System.out.println("Used technique: " + configuration.getLooseTechnique());
                     System.out.println(
                             "Your current account balance is: " + userBalance + " " + configuration.getBetCoin());
                     System.out.print("How much would you like to spend? ");
@@ -131,6 +132,9 @@ public class Gambler {
         );
     }
 
+    //    private static final int[] array = new int[]{1, 1, 1, 2, 4, 8, 16, 32};
+    private static final int[] array = new int[]{1, 1, 1, 2, 4, 8}; //, 16, 32};
+
     public static void main(final String[] args) {
         init();
 
@@ -143,6 +147,7 @@ public class Gambler {
         final BigDecimal target = readUserTarget();
 
         BigDecimal bet = configuration.getBaseSetPoint();
+        boolean underOverFlag = true;
         boolean lastWin = false;
         int looseStep = 0;
         System.out.print("[" + account.toString() + "] [" + stats.getWinRatio() + "] Bet: " + bet + " ... ");
@@ -150,15 +155,15 @@ public class Gambler {
             if (bet.compareTo(configuration.getAskPoint()) >= 0) {
                 final String answer = readUserAnswer(bet);
                 switch (answer) {
-                case "n":
-                    looseStep = 0;
-                    bet = configuration.getBaseSetPoint();
-                case "y":
-                    break;
-                case "q":
-                    scanner.close();
-                    System.exit(0);
-                    break;
+                    case "n":
+                        looseStep = 0;
+                        bet = configuration.getBaseSetPoint();
+                    case "y":
+                        break;
+                    case "q":
+                        scanner.close();
+                        System.exit(0);
+                        break;
                 }
                 System.out.print("[" + account.toString() + "] [" + stats.getWinRatio() + "] Bet: " + bet + " ... ");
             }
@@ -166,7 +171,7 @@ public class Gambler {
             final PlaceBetResponse response;
             try {
                 response = endpoint.placebet(configuration.getBetCoin(), configuration.getPersonalApiKey(),
-                        createBetRequest(bet));
+                        createBetRequest(bet, underOverFlag));
             } catch (final HttpResponseStatusException e) {
                 System.out.println("Http status: " + e.getStatusCode());
                 // retry
@@ -184,6 +189,11 @@ public class Gambler {
                 System.out.println("You catch a target. Stop playing!");
                 break;
             }
+            // calculate underOverFlag
+            if (configuration.getLooseTechnique() == ELooseTechnique.ZERO2N1SWAP) {
+                // keep close statistical 0.5
+                underOverFlag = stats.getWinRatio() < 0.5;
+            }
             // calculate next bet
             if (curWin) {
                 // win
@@ -197,25 +207,46 @@ public class Gambler {
                 }
             } else {
                 switch (configuration.getLooseTechnique()) {
-                case DOUBLE:
-                    bet = bet.add(bet);
-                    break;
-                case ZERO2N1:
-                    // lose
-                    if (looseStep == 0) {
-                        bet = bet.add(configuration.getBaseSetPoint());
-                    } else if (looseStep == 1) {
-                        bet = bet.add(bet).subtract(configuration.getBaseSetPoint());
-                    } else {
+                    case DOUBLE:
+                        bet = bet.add(bet);
+                        break;
+                    case ZERO2N1SWAP:
+                    case ZERO2N1:
+                        // lose
+                        if (looseStep == 0) {
+                            bet = bet.add(configuration.getBaseSetPoint());
+                        } else if (looseStep == 1) {
+                            bet = bet.add(bet).subtract(configuration.getBaseSetPoint());
+                        } else {
+                            bet = bet.add(bet).add(configuration.getBaseSetPoint());
+                        }
+                        break;
+                    case ALL2N1:
                         bet = bet.add(bet).add(configuration.getBaseSetPoint());
-                    }
-                    break;
-                case ALL2N1:
-                    bet = bet.add(bet).add(configuration.getBaseSetPoint());
-                    break;
-                case BASE:
-                    bet = configuration.getBaseSetPoint();
-                    break;
+                        break;
+                    case BASE:
+                        bet = configuration.getBaseSetPoint();
+                        break;
+                    case ZEROTRIO:
+                        if (looseStep <= 1) {
+                            bet = configuration.getBaseSetPoint();
+                        } else {
+                            bet = bet.multiply(new BigDecimal(3));
+                        }
+                        break;
+                    case TRIO:
+                        if (lastWin) {
+                            bet = configuration.getBaseSetPoint();
+                        } else {
+                            bet = bet.multiply(new BigDecimal(3));
+                        }
+                        break;
+                    case ARRAY:
+                        if (looseStep < array.length) {
+                            bet = configuration.getBaseSetPoint().multiply(new BigDecimal(array[looseStep]));
+                        } else {
+                            bet = configuration.getBaseSetPoint();
+                        }
                 }
                 looseStep++;
             }

@@ -23,15 +23,11 @@ class MarketWatcher implements Runnable {
 
         // calculate trade statistics
         final LinkedList<Trade> tradeSet = coinWatch.getTrades();
-        long id = 0;
         BigDecimal tradePrice = BigDecimal.ZERO;
         BigDecimal tradeQuantity = BigDecimal.ZERO;
         BigDecimal tradeAvgPrice = BigDecimal.ZERO;
         for (final Trade trade : tradeSet) {
-            if (id < trade.getId()) {
-                id = trade.getId();
-                tradePrice = trade.getPrice();
-            }
+            tradePrice = trade.getPrice();
             tradeQuantity = tradeQuantity.add(trade.getQuantity());
             tradeAvgPrice = tradeAvgPrice.add(trade.getPrice().multiply(trade.getQuantity()));
         }

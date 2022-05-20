@@ -12,17 +12,14 @@
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-store-api</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-exchange-manager</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-ui-api</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

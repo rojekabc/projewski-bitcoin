@@ -4,7 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 import pl.projewski.bitcoin.common.configuration.ConfigurationManager;
 import pl.projewski.bitcoin.common.configuration.ModuleConfiguration;
-import pl.projewski.bitcoin.exchange.api.*;
+import pl.projewski.bitcoin.exchange.api.IExchange;
+import pl.projewski.bitcoin.exchange.api.Market;
+import pl.projewski.bitcoin.exchange.api.Order;
+import pl.projewski.bitcoin.exchange.api.OrderBook;
+import pl.projewski.bitcoin.exchange.api.Trade;
 import pl.projewski.bitcoin.exchange.binance.api.v1.BinanceEndpoint;
 import pl.projewski.bitcoin.exchange.binance.api.v1.ExchangeInfo;
 import pl.projewski.bitcoin.exchange.binance.api.v1.Price;
@@ -39,8 +43,8 @@ public class BinanceExchange implements IExchange {
     }
 
     @Override
-    public BigDecimal getMarketPrice(final String symbol) {
-        final List<Price> price = binance.price(symbol);
+    public BigDecimal getMarketPrice(final String firstSymbol, final String secondSymbol) {
+        final List<Price> price = binance.price(firstSymbol + '-' + secondSymbol);
         return price.get(0).getPrice();
     }
 
@@ -52,7 +56,7 @@ public class BinanceExchange implements IExchange {
             final Trade trade = new Trade();
             trade.setPrice(btrade.getPrice());
             trade.setQuantity(btrade.getQty());
-            trade.setId(btrade.getId());
+            trade.setId(Long.toString(btrade.getId()));
             result.add(trade);
         }
         return result;

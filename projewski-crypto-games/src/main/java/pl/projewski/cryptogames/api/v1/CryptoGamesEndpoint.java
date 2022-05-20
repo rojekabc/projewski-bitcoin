@@ -9,7 +9,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class CryptoGamesEndpoint {
-    public static final String CRYPTOGAMES_BASE_URI = "https://api.crypto-games.net/v1/";
+    // public static final String CRYPTOGAMES_BASE_URI = "https://api.crypto-games.net/v1/";
+    public static final String CRYPTOGAMES_BASE_URI = "https://api.crypto.games/v1/";
 
     public PlaceBetResponse placebet(final String coin, final String userApiKey, final PlaceBetRequest request) {
         final Gson gson = new Gson();

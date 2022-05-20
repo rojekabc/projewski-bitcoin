@@ -15,7 +15,6 @@
         <dependency>
             <groupId>pl.projewski.bitcoin</groupId>
             <artifactId>projewski-explorer-api</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
